@@ -1,0 +1,11 @@
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\bin\Debug\MathStat.exe.config
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\bin\Debug\MathStat.exe
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\bin\Debug\MathStat.pdb
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.AssemblyReference.cache
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.SuggestedBindingRedirects.cache
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.Form1.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.Properties.Resources.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.GenerateResource.cache
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.CoreCompileInputs.cache
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.exe
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.pdb
