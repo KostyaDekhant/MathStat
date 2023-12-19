@@ -9,3 +9,4 @@ C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.Gene
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.CoreCompileInputs.cache
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.exe
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.pdb
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.ResolveComReference.cache
