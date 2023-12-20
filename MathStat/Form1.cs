@@ -18,26 +18,26 @@ namespace MathStat
             InitializeComponent();
         }
 
-        Queue <Double> weight = new Queue <Double> ();
-        Queue <Int32> height = new Queue <Int32> ();
-        string path = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\data.txt";
-        Chart[] chart = new Chart[4];
+        Queue <Double> weight = new Queue <Double> (); //Вес
+        Queue <Int32> height = new Queue <Int32> ();   //Рост
+        string path = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\data.txt"; //Путь к исходникам
+        Chart[] chart = new Chart[4]; //Графики
 
+        //Для Ф(x)
         Microsoft.Office.Interop.Excel.Application exApp = new Microsoft.Office.Interop.Excel.Application();
 
         double minW, maxW, RxW;
         int minH, maxH, RyH, hyH, hxW;
         int rangeH;
         double rangeW;
-        int[] a = new int[8];
-        int[] b = new int[8];
+        int[] a = new int[8]; //Вес
+        int[] b = new int[8]; //Рост
+        double[] ui = new double[7]; //Для веса
+        double[] vi = new double[7]; //Для роста
         double extensionW;
         double extensionH;
 
-        List<Tuple<double, double, double>> F = new List<Tuple<double, double, double>>();
-
-        double[] ui = new double[7];
-        double[] vi = new double[7];
+        //List<Tuple<double, double, double>> F = new List<Tuple<double, double, double>>();
 
         string[] FirstHeaders = { "[ai–1, ai)", "xi*", "ni", "ni/n", "ni/n*hx" };
         string[] SecondHeaders = { "[bi-1, bi)", "yi*", "mi", "mi/n", "mi/n*hy" };
@@ -47,11 +47,18 @@ namespace MathStat
         string[] strX = { "x", "ni/n" };
         string[] strY = { "y", "mi/n" };
 
+        //Variebles for Table3
+        double u_, v_, u2_, v2_, su2, sv2, x_, y_, s2x, s2y, su, sv, sx, sy;
 
+        //Таблицы
         DataGridView[] dataGrid = new DataGridView[6];
 
-        Label[] nameTables = new Label[5];
+        Label[] nameTables = new Label[15];
         Label testLb = new Label();
+
+        //Нужно для цветов строк
+        DataGridViewCellStyle row = new DataGridViewCellStyle(); //Серый цвет (закрашенный)
+        DataGridViewCellStyle row1 = new DataGridViewCellStyle(); //Стандартный цвет
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -62,11 +69,11 @@ namespace MathStat
                 chart[i].Series.Add("");
                 chart[i].ChartAreas.Add("");
             }
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 15; i++)
             {
                 nameTables[i] = new Label();
-                nameTables[i].Size = new Size(100, 20);
-                Controls.Add(nameTables[i]);
+                nameTables[i].Size = new Size(300, 20);
+                //Controls.Add(nameTables[i]);
             }
             chart[0].Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             chart[0].Series[0].BorderWidth = 5;
@@ -75,55 +82,176 @@ namespace MathStat
             chart[1].Series[0]["PointWidth"] = "1";
             chart[3].Series[0]["PointWidth"] = "1";
 
+
+            //Watermark
             testLb.Location = new Point(980, 9);
             testLb.Size = new Size(100, 40);
             testLb.Text = "Сделал\nКостя Дехант ПИ11";
-            Controls.Add(testLb);
+            //Controls.Add(testLb);
 
-            nameTables[0].Location = new Point(20, 20); //Текст над таблицей 2
-            nameTables[1].Location = new Point(360+ 20, 20); //Текст над таблицей 3
-            nameTables[2].Location = new Point(360+ 20+360, 20); //Текст над таблицей 4
+            //nameTables[0].Location = new Point(20, 20); //Текст над таблицей 2
+            //nameTables[1].Location = new Point(360+ 20, 20); //Текст над таблицей 3
+            //nameTables[2].Location = new Point(360+ 20+360, 20); //Текст над таблицей 4
             
             
-            
-            //chart[1].Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            this.Size = new Size(1440+400,720);
+            //Размер окна
+            this.Size = new Size(1440,720);
+
+            //Инициализация таблиц
             for (int i = 0; i < 6; i++)
             {
                 dataGrid[i] = new DataGridView();
             }
-            ReadFile(path);
+            ReadFile(path); //Чтение исходников
 
             row.BackColor = Color.LightGray;
 
-            FirstTable();
-            FillTableX(dataGrid[0]);
-            DrawGisto(a, strX, chart[0], false, new Point(20, 179 + 70), false);
-            strX[1] = "n1/n*hx";
-            DrawGisto(a, strX, chart[1], true, new Point(20, 179 + 70 + 179 + 20), false);
+            InitTables();
+            InitTabCtrl();
             
-            SecondTable();
-            FillTableY(dataGrid[1]);
-            DrawGisto(b, strY, chart[2], false, new Point(340+40, 179 + 70),true);
-            strY[1] = "m1/n*hy";
-            DrawGisto(b, strY, chart[3], true, new Point(340 + 40, 179 + 70 + 179 + 20), true);
-
-            ThirdTable();
-            FillTable3(dataGrid[2]);
 
 
-            TableFour();
-            TableFive();
-            TableSix();
+            //Создание кнопки для перезагрузки исходных данных
             Button button = new Button();
             button.Location = new Point(1360, 0);
             button.Size = new Size(20, 20);
             button.Visible = true;
             button.Click += new EventHandler(this.Refrech_Click);
             Controls.Add(button);
+            //-!
         }
 
-        
+        private void InitTables()
+        {
+            //Всё необходимое для первого пункта
+            FirstTable();
+            DrawDataGrid(FirstHeaders, new Point(20, 40), new Size(40 + 60 * 5, 179), dataGrid[0], 8, 6);
+            FillTableX(dataGrid[0]);
+            DrawGisto(a, strX, chart[0], false, new Point(dataGrid[0].Location.X + 20 + dataGrid[0].Width, dataGrid[0].Location.Y), false);
+            strX[1] = "n1/n*hx";
+            DrawGisto(a, strX, chart[1], true, new Point(chart[0].Location.X + 20 + chart[0].Width, chart[0].Location.Y), false);
+            nameTables[0].Location = new Point(dataGrid[0].Location.X, dataGrid[0].Location.Y - 20);
+            nameTables[0].Text = "Таблица 2 – Группированный ряд для X";
+            nameTables[1].Location = new Point(chart[0].Location.X, chart[0].Location.Y - 20);
+            nameTables[1].Text = "Полигон относительных частот";
+            nameTables[2].Location = new Point(chart[1].Location.X, chart[1].Location.Y - 20);
+            nameTables[2].Text = "Гистрограмма относительных частот";
+
+
+            SecondTable();
+            DrawDataGrid(SecondHeaders, new Point(20, dataGrid[0].Location.Y+40 + dataGrid[0].Height), new Size(40 + 60 * 5, 179), dataGrid[1], 8, 6);
+            FillTableY(dataGrid[1]);
+            DrawGisto(b, strY, chart[2], false, new Point(dataGrid[1].Location.X + 20 + dataGrid[1].Width, dataGrid[1].Location.Y), true);
+            strY[1] = "m1/n*hy";
+            DrawGisto(b, strY, chart[3], true, new Point(chart[2].Location.X + 20 + chart[2].Width, chart[2].Location.Y), true);
+            nameTables[3].Location = new Point(dataGrid[1].Location.X, dataGrid[1].Location.Y - 20);
+            nameTables[3].Text = "Таблица 3 – Группированный ряд для Y";
+            nameTables[4].Location = new Point(chart[2].Location.X, chart[2].Location.Y - 20);
+            nameTables[4].Text = "Полигон относительных частот";
+            nameTables[5].Location = new Point(chart[3].Location.X, chart[3].Location.Y - 20);
+            nameTables[5].Text = "Гистрограмма относительных частот";
+            //-!
+
+
+
+            //Пункт 2
+            ThirdTable();
+            DrawDataGrid(ThirdHeaders, new Point(20, 40), new Size(40 + 60 * 8, 179 + 21), dataGrid[2], 9, 9);
+            FillTable3(dataGrid[2]);
+            nameTables[6].Location = new Point(dataGrid[2].Location.X, dataGrid[2].Location.Y - 20);
+            nameTables[6].Text = "Таблица 4 – Группированные данные для условных вариант";
+            //-!
+
+            //Пунтк 3
+
+            DrawDataGrid(FourHeaders, new Point(20,40),
+                                new Size(40 + 60 * 8 - 32, 179 + 20), dataGrid[3], 9, 8);
+            TableFour();
+            FillTable4(dataGrid[3]);
+            nameTables[7].Location = new Point(dataGrid[3].Location.X, dataGrid[3].Location.Y - 20);
+            nameTables[7].Text = "Таблица 5 – Расчёт Xв^2 для признака X";
+
+
+            DrawDataGrid(FiveHeaders, new Point(dataGrid[3].Location.X + dataGrid[3].Width + 20, dataGrid[3].Location.Y),
+               new Size(40 + 60 * 8 - 32, 179 + 20), dataGrid[4], 9, 8);
+            TableFive();
+            FillTable5(dataGrid[4]);
+            nameTables[8].Location = new Point(dataGrid[4].Location.X, dataGrid[4].Location.Y - 20);
+            nameTables[8].Text = "Таблица 6 – Расчёт Xв^2 для признака Y";
+            //-!
+
+            //Пунтк 4
+
+            //Реализовать подсчёты
+
+            //-!
+
+            //Пункт 5
+            //Заголовки и поправить в целом
+            string[] SixHeaders = { };
+            DrawDataGrid(SixHeaders, new Point(20, 40),
+                new Size(40 + 60 * 8 - 80, 179 + 20), dataGrid[5], 9, 9);
+            FillTable6(dataGrid[5]);
+            TableSix();
+            nameTables[9].Location = new Point(dataGrid[5].Location.X, dataGrid[5].Location.Y - 20);
+            nameTables[9].Text = "Таблица 7 – Корреляционная таблица";
+            //-!
+        }
+        private void InitTabCtrl()
+        {
+            TabPage []tabPage = new TabPage[7];
+
+            for (int i = 0; i < 7; i++)
+            {
+                tabPage[i] = new TabPage();
+
+               
+                tabControl1.Controls.Add(tabPage[i]);
+                tabControl1.TabPages[i].Text = "Пункт " + (i + 1).ToString();
+            }
+            tabPage[0].Controls.Add(dataGrid[0]);
+            tabPage[0].Controls.Add(nameTables[0]);
+            tabPage[0].Controls.Add(dataGrid[1]);
+            tabPage[0].Controls.Add(nameTables[1]);
+            tabPage[0].Controls.Add(chart[0]); 
+            tabPage[0].Controls.Add(nameTables[2]);
+            tabPage[0].Controls.Add(chart[1]);
+            tabPage[0].Controls.Add(nameTables[3]);
+            tabPage[0].Controls.Add(chart[2]); 
+            tabPage[0].Controls.Add(nameTables[4]);
+            tabPage[0].Controls.Add(chart[3]); 
+            tabPage[0].Controls.Add(nameTables[5]);
+
+
+            tabPage[1].Controls.Add(dataGrid[2]);
+            tabPage[1].Controls.Add(nameTables[6]);
+
+            tabPage[2].Controls.Add(dataGrid[3]);
+            tabPage[2].Controls.Add(nameTables[7]);
+
+            tabPage[2].Controls.Add(dataGrid[4]);
+            tabPage[2].Controls.Add(nameTables[8]);
+
+            //tabPage[4].Controls.Add();
+            tabPage[4].Controls.Add(dataGrid[5]);
+            tabPage[4].Controls.Add(nameTables[9]);
+
+            tabControl1.Size = new Size(4 * 20 + dataGrid[0].Width + chart[0].Width + chart[1].Width + dataGrid[0].Location.X, 
+                dataGrid[0].Location.Y + dataGrid[0].Height + dataGrid[1].Height+20*4);
+
+
+
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+           if(tabControl1.SelectedIndex == 0)
+            {
+                //tabControl1.Size = new Size(5 * 20 + dataGrid[0].Width + chart[0].Width + chart[1].Width, 4 * 20 + dataGrid[0].Height + dataGrid[1].Height);
+            }
+        }
+
+
         //Исправить ещё в одном месте значение, чтобы не слетало.
         void Refrech_Click(Object sender,
                                EventArgs e)
@@ -173,7 +301,6 @@ namespace MathStat
             FillTable4(dataGrid[3]);
             TableFive();
             //FillTable5(dataGrid[4]);
-
             DrawGisto(a, strX, chart[0], false, new Point(20, 179 + 70), false);
             strX[1] = "n1/n*hx";
             DrawGisto(a, strX, chart[1], true, new Point(20, 179 + 70 + 179 + 20), false);
@@ -189,7 +316,6 @@ namespace MathStat
          //Таблица 2, но первая для подсчётов (группированный ряд для X)
         private void FirstTable()
         {
-            nameTables[0].Text = "Таблица 2";
             minW = weight.Min(); 
             maxW = weight.Max(); 
             RxW = maxW - minW;
@@ -206,12 +332,10 @@ namespace MathStat
             {
                 a[i] = a[i - 1] + hxW;
             }
-            DrawDataGrid(FirstHeaders, new Point(20, 50), new Size(40 + 60 * 5, 179), dataGrid[0], 8, 6);
         }
 
         private void SecondTable()
         {
-            nameTables[1].Text = "Таблица 3";
             minH = height.Min();
             maxH = height.Max();
             RyH = maxH - minH;
@@ -226,46 +350,35 @@ namespace MathStat
             {
                 b[i] = b[i - 1] + hyH;
             }
-            DrawDataGrid(SecondHeaders, new Point(20+20+340, 50), new Size(40 + 60 * 5, 179), dataGrid[1], 8,6);
         }
 
         private void ThirdTable()
         {
-            nameTables[2].Text = "Таблица 4";
-            DrawDataGrid(ThirdHeaders, new Point(20 + 20 + 340 + 340 + 20, 50), new Size(40 + 60 * 8, 179+21), dataGrid[2], 9, 9);
+            //DrawDataGrid(ThirdHeaders, new Point(20 + 20 + 340 + 340 + 20, 50), new Size(40 + 60 * 8, 179+21), dataGrid[2], 9, 9);
         }
 
         private void TableFour()
         {
-            DrawDataGrid(FourHeaders, new Point(20 + 20 + 340 + 340 + 20, 50 + 240-40), 
-                new Size(40 + 60 * 8-32, 179+20), dataGrid[3], 9, 8);
-            dataGrid[3].Columns[3].Width += 10;
-            dataGrid[3].Columns[7].Width += 15;
-            FillTable4(dataGrid[3]);
+            //исправить ширину
+            dataGrid[3].Columns[3].Width = 70;
+            dataGrid[3].Columns[7].Width = 75;
         }
 
         private void TableFive()
         {
-            DrawDataGrid(FiveHeaders, new Point(20 + 20 + 340 + 340 + 20, 50 + 240-40+ 179 + 20), 
-                new Size(40 + 60 * 8-32, 179+20), dataGrid[4], 9, 8);
-            dataGrid[4].Columns[3].Width += 10;
-            dataGrid[4].Columns[7].Width += 15;
-            FillTable5(dataGrid[4]);
+            dataGrid[4].Columns[3].Width = 70;
+            dataGrid[4].Columns[7].Width = 75;
         }
 
 
         private void TableSix()
         {
-            //Заголовки и поправить в целом
-            string[] SixHeaders = { };
-            DrawDataGrid(SixHeaders, new Point(20 + 20 + 340 + 340 + 20 + 20 + 40 + 60 * 8, 50),
-                new Size(40 + 60 * 8 - 80, 179 + 20), dataGrid[5], 9, 9);
             for (int i = 1; i < 9; i++)
             {
                 dataGrid[5].Columns[i].Width = 50;
             }
             dataGrid[5].Columns[0].HeaderText = "X/Y";
-            FillTable6(dataGrid[5]);
+            
             for (int i = 0; i < 7; i++)
             {
                 dataGrid[5].Rows[i].Cells[8].Value = FindNumsW(a[i], a[i + 1]).ToString(); 
@@ -327,7 +440,7 @@ namespace MathStat
             data.AllowUserToResizeColumns = false;
             data.ScrollBars = ScrollBars.None;
             data.Enabled = false;
-            Controls.Add(data);
+            //Controls.Add(data);
             data.ClearSelection();
         }
 
@@ -340,45 +453,226 @@ namespace MathStat
             return Fnum;
         }
 
-        DataGridViewCellStyle row = new DataGridViewCellStyle();
-        DataGridViewCellStyle row1 = new DataGridViewCellStyle();
-        
 
-        private void FillTable6(DataGridView dataGrid1)
+       
+
+        private void FillTableX(DataGridView dataGrid1)
         {
-            int[] H = height.ToArray<Int32>(); 
-            double[] W = weight.ToArray<Double>();
-            int hlen;//, wlen;
-            hlen = H.Length;
-            //wlen = W.Length;
-            int[,] map = new int[7, 7]; 
-            for (int i = 0; i < hlen; i++)
+            for (int i = 0; i < 7; i++)
             {
-                for (int j = 0; j < 7; j++)
-                {
-                    for (int k = 0; k < 7; k++)
-                    {
-                        if (a[j] <= W[i] && W[i] < a[j + 1] && b[k] <= H[i] && H[i] < b[k + 1])
-                        {
-                            map[j, k]++;
-                        }
-                    }
-                    
-                }
-            }
-            for (int i = 1; i < 8; i++)
-            {
-                for (int j = 0; j < 7; j++)
-                {
-                    if(map[j, i - 1] != 0)
-                        dataGrid1[i, j].Value = map[j, i-1].ToString();
-                }
+                int ni = FindNumsW(a[i], a[i + 1]);
+                dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
+                dataGrid1.Rows[i].Cells[1].Value = "[" + Convert.ToString(a[i]) + ", " + Convert.ToString(a[i + 1]);
+                if (i == 6)
+                    dataGrid1.Rows[i].Cells[1].Value += "]";
+                else
+                    dataGrid1.Rows[i].Cells[1].Value += ")";
+                dataGrid1.Rows[i].Cells[2].Value = Convert.ToString((a[i] + hxW + a[i]) / 2);
+                dataGrid1.Rows[i].Cells[3].Value = Convert.ToString(ni);
+                dataGrid1.Rows[i].Cells[4].Value = string.Format("{0: 0.00}", (double)(ni) / 50);
+                dataGrid1.Rows[i].Cells[5].Value = string.Format("{0: 0.000}", (double)(ni) / 50 / hxW);
             }
         }
+
+        private void FillTableY(DataGridView dataGrid1)
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                int mi = FindNumsH(b[i], b[i + 1]);
+                dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
+                dataGrid1.Rows[i].Cells[1].Value = "[" + Convert.ToString(b[i]) + ", " + Convert.ToString(b[i + 1]);
+                if (i == 6)
+                    dataGrid1.Rows[i].Cells[1].Value += "]";
+                else
+                    dataGrid1.Rows[i].Cells[1].Value += ")";
+                dataGrid1.Rows[i].Cells[2].Value = Convert.ToString((b[i] + hyH + b[i]) / 2);
+                dataGrid1.Rows[i].Cells[3].Value = Convert.ToString(mi);
+                dataGrid1.Rows[i].Cells[4].Value = string.Format("{0: 0.00}", (double)(mi) / 50);
+                dataGrid1.Rows[i].Cells[5].Value = string.Format("{0: 0.000}", (double)(mi) / 50 / hyH);
+            }
+        }
+
+        private void FillTable3(DataGridView dataGrid1)
+        {
+            double xavr = (double)(a[3] + a[3 + 1])/2;
+            double yavr = (double)(b[3] + b[3 + 1])/2;
+            double[] sum = new double[8];
+            for (int i = 0; i < 8; i++)
+            {
+                sum[i] = 0;
+            }
+            for (int i = 0; i < 7; i++)
+            {
+                int ni = FindNumsW(a[i], a[i + 1]);
+                int mi = FindNumsH(b[i], b[i + 1]);
+                sum[1] += ni;
+                sum[5] += mi;
+                dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
+                double ui = ((double)(a[i] + a[i + 1]) / 2 - xavr) / hxW;
+                double vi = ((double)(b[i] + b[i + 1]) / 2 - yavr) / hyH;
+                sum[0] += ui;
+                sum[4] += vi;
+                dataGrid1.Rows[i].Cells[1].Value = ui;
+                dataGrid1.Rows[i].Cells[2].Value = Convert.ToString(ni);
+                dataGrid1.Rows[i].Cells[3].Value = Convert.ToString(ui*ni);
+                dataGrid1.Rows[i].Cells[4].Value = Convert.ToString(ui*ui*ni);
+                dataGrid1.Rows[i].Cells[5].Value = vi;
+                dataGrid1.Rows[i].Cells[6].Value = Convert.ToString(mi);
+                dataGrid1.Rows[i].Cells[7].Value = Convert.ToString(vi * mi);
+                dataGrid1.Rows[i].Cells[8].Value = Convert.ToString(vi * vi * mi);
+
+                sum[2] += ui*ni;
+                sum[3] += ui*ui*ni;
+                sum[6] += vi*mi;
+                sum[7] += vi*vi*mi;
+            }
+            dataGrid1.Rows[7].Cells[0].Value = "Σ";
+            for (int i = 0; i < 8; i++)
+            {
+                if(sum[i] == 0)
+                    dataGrid1.Rows[7].Cells[i + 1].Value = "-";
+                else
+                    dataGrid1.Rows[7].Cells[i+1].Value = Convert.ToString(sum[i]);
+            }
+            u_ = (double)sum[2] / 50;
+            v_ = (double)sum[6] / 50;
+            u2_ = sum[3] / 50;
+            v2_ = sum[7] / 50;
+            su2 = Math.Round(50 * (u2_ - u_ * u_) / 49, 2);
+            sv2 = Math.Round(50 * (v2_ - v_ * v_) / 49, 2);
+            su = Math.Round(Math.Sqrt(su2),2);
+            sv = Math.Round(Math.Sqrt(sv2),2 );
+            x_ = hxW * u_ + xavr;
+            y_ = Math.Round(hyH * v_ + yavr, 1);
+            s2x = hxW * hxW * su2;
+            s2y = hyH * hyH * sv2;
+            sx = Math.Round(Math.Sqrt(s2x), 2);
+            sy = Math.Round(Math.Sqrt(s2y), 2);
+        }
+
+        private void FillTable4(DataGridView dataGrid1)
+        {
+            double[] zi = new double[8];
+            zi[0] = -7.0;
+            zi[7] = 7.0;
+            double[] npi = new double[7];
+            int nisum = 0;
+            double npisum = 0;
+            double pisum = 0;
+            int[] ni = new int[7];
+            for (int i = 0; i < 7; i++)
+            {
+                dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
+                if (i == 0)
+                    dataGrid1.Rows[i].Cells[1].Value = "(-oo, " + Convert.ToString(a[i + 1]);
+                else if (i == 6)
+                    dataGrid1.Rows[i].Cells[1].Value = "[" + Convert.ToString(a[i]) + ", +oo";
+                else
+                    dataGrid1.Rows[i].Cells[1].Value = "[" + Convert.ToString(a[i]) + ", " + Convert.ToString(a[i + 1]);
+                dataGrid1.Rows[i].Cells[1].Value += ")";
+                ni[i] = FindNumsW(a[i], a[i + 1]);
+                nisum += ni[i];
+                dataGrid1.Rows[i].Cells[2].Value = Convert.ToString(ni[i]);
+                if (i + 1 != 7)
+                    zi[i + 1] = Math.Round((a[i + 1] - x_) / sx, 2);
+
+                dataGrid1.Rows[i].Cells[3].Value = Convert.ToString(string.Format("{0: 0.00}", zi[i + 1]));
+                if (i == 6)
+                    dataGrid1.Rows[i].Cells[3].Value = "+oo";
+                dataGrid1.Rows[i].Cells[4].Value = Convert.ToString(string.Format("{0: 0.000}", Math.Round(Ffuncion(zi[i + 1]) + 0.0001, 3)));
+                double pi = Math.Round(Ffuncion(zi[i + 1]) + 0.0001, 3) - Math.Round(Ffuncion(zi[i]) + 0.0001, 3);
+                dataGrid1.Rows[i].Cells[5].Value = Convert.ToString(string.Format("{0: 0.000}", Math.Round(pi, 3)));
+                npi[i] = Math.Round(pi, 4) * 50;
+                pisum += Math.Round(pi, 4);
+                dataGrid1.Rows[i].Cells[6].Value = string.Format("{0: 0.00}", npi[i]);
+                npisum += npi[i];
+            }
+
+
+            bool AddQ = false;
+
+            DataGridViewCellStyle row = new DataGridViewCellStyle();
+            row.BackColor = Color.LightGray;
+
+            for (int i = 0; i < 7; i++)
+            {
+                int num = i + 1;
+                if (npi[i] < 5)
+                {
+                    dataGrid1.Rows[i].DefaultCellStyle = row;
+                    AddQ = true;
+                    if (AddQ && i == 6)
+                    {
+                        for (int j = i - 1; j >= 0; j--)
+                        {
+                            if (npi[j] > 5)
+                            {
+                                int num1 = j + 1;
+                                dataGrid1.Rows[j].DefaultCellStyle = row;
+                                AddQ = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if (AddQ)
+                {
+                    dataGrid1.Rows[i].DefaultCellStyle = row;
+                    AddQ = false;
+                }
+            }
+            int m = 0;
+            for (int i = 0; i < 7; i++)
+            {
+                if (dataGrid1.Rows[i].DefaultCellStyle != row)
+                    m++;
+                else if (dataGrid1.Rows[i].DefaultCellStyle == row && dataGrid1.Rows[i + 1].DefaultCellStyle != row)
+                    m++;
+            }
+            double npitemp = 0;
+            int nitemp = 0;
+            double tempsum7 = 0;
+            for (int i = 0; i < 7; i++)
+            {
+                if (dataGrid1.Rows[i].DefaultCellStyle != row)
+                {
+                    double tempnum = Math.Round((ni[i] - npi[i]) * (ni[i] - npi[i]) / (npi[i]), 2);
+                    dataGrid1.Rows[i].Cells[7].Value = tempnum;
+                    tempsum7 += tempnum;
+                }
+                else if (dataGrid1.Rows[i].DefaultCellStyle == row && dataGrid1.Rows[i + 1].DefaultCellStyle != row)
+                {
+                    nitemp += ni[i];
+                    npitemp += npi[i];
+                    double tempnum = Math.Round((nitemp - npitemp) * (nitemp - npitemp) / (npitemp), 2);
+                    dataGrid1.Rows[i].Cells[7].Value = tempnum;
+                    tempsum7 += tempnum;
+                    npitemp = 0;
+                    nitemp = 0;
+                }
+                else
+                {
+                    nitemp += ni[i];
+                    npitemp += npi[i];
+                }
+            }
+
+
+
+            dataGrid1.Rows[7].Cells[0].Value = "Σ";
+            dataGrid1.Rows[7].Cells[1].Value = "-";
+            dataGrid1.Rows[7].Cells[2].Value = Convert.ToString(nisum);
+            dataGrid1.Rows[7].Cells[3].Value = "-";
+            dataGrid1.Rows[7].Cells[4].Value = "-";
+            dataGrid1.Rows[7].Cells[5].Value = pisum;
+            dataGrid1.Rows[7].Cells[6].Value = Convert.ToString(npisum);
+            dataGrid1.Rows[7].Cells[7].Value = tempsum7;
+        }
+
         private void FillTable5(DataGridView dataGrid1)
         {
 
-            
+
             double[] zi = new double[8];
             zi[0] = -7.0;
             zi[7] = 7.0;
@@ -415,7 +709,7 @@ namespace MathStat
                 npisum += npi[i];
                 //dataGrid1.Rows[i].Cells[7].Value = Math.Round((ni[i] - npi[i]) * (ni[i] - npi[i]) /(npi[i]),2);
             }
-            
+
             //str.Location = new Point(1440 - 100, 20);
             //str.Size = new Size(300, 300);
             //str.Text = "";
@@ -489,7 +783,7 @@ namespace MathStat
                     npitemp += npi[i];
                 }
             }
-        
+
             dataGrid1.Rows[7].Cells[0].Value = "Σ";
             dataGrid1.Rows[7].Cells[1].Value = "-";
             dataGrid1.Rows[7].Cells[2].Value = Convert.ToString(misum);
@@ -500,240 +794,40 @@ namespace MathStat
             dataGrid1.Rows[7].Cells[7].Value = tempsum7;
             //str.Text = m + "";
             //Controls.Add(str);
-         
+
         }
 
-
-
-       //Label str = new Label();
-        private void FillTable4(DataGridView dataGrid1)
+        private void FillTable6(DataGridView dataGrid1)
         {
-            double[] zi = new double[8];
-            zi[0] = -7.0;
-            zi[7] = 7.0;
-            double[] npi = new double[7];
-            int nisum = 0;
-            double npisum = 0;
-            double pisum = 0;
-            int[] ni = new int[7];
-            for (int i = 0; i < 7; i++)
+            int[] H = height.ToArray<Int32>();
+            double[] W = weight.ToArray<Double>();
+            int hlen;//, wlen;
+            hlen = H.Length;
+            //wlen = W.Length;
+            int[,] map = new int[7, 7];
+            for (int i = 0; i < hlen; i++)
             {
-                dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
-                if(i == 0)
-                    dataGrid1.Rows[i].Cells[1].Value = "(-oo, " + Convert.ToString(a[i + 1]);
-                else if (i == 6)
-                    dataGrid1.Rows[i].Cells[1].Value = "[" + Convert.ToString(a[i]) + ", +oo";
-                else
-                    dataGrid1.Rows[i].Cells[1].Value = "[" + Convert.ToString(a[i]) + ", " + Convert.ToString(a[i + 1]);
-                dataGrid1.Rows[i].Cells[1].Value += ")";
-                ni[i] = FindNumsW(a[i], a[i + 1]);
-                nisum += ni[i];
-                dataGrid1.Rows[i].Cells[2].Value = Convert.ToString(ni[i]);
-                if(i+1 != 7)
-                    zi[i+1] = Math.Round((a[i+1] - x_) / sx,2);
-                
-                dataGrid1.Rows[i].Cells[3].Value = Convert.ToString(string.Format("{0: 0.00}", zi[i+1]));
-                if(i == 6)
-                    dataGrid1.Rows[i].Cells[3].Value = "+oo";
-                dataGrid1.Rows[i].Cells[4].Value = Convert.ToString(string.Format("{0: 0.000}", Math.Round(Ffuncion(zi[i + 1])+0.0001,3)));
-                double pi = Math.Round(Ffuncion(zi[i + 1]) + 0.0001, 3) - Math.Round(Ffuncion(zi[i]) + 0.0001, 3);
-                dataGrid1.Rows[i].Cells[5].Value = Convert.ToString(string.Format("{0: 0.000}", Math.Round(pi, 3)));
-                npi[i] = Math.Round(pi, 4) * 50;
-                pisum += Math.Round(pi, 4);
-                dataGrid1.Rows[i].Cells[6].Value = string.Format("{0: 0.00}", npi[i]);
-                npisum += npi[i];
-                //dataGrid1.Rows[i].Cells[7].Value = Math.Round((ni[i] - npi[i]) * (ni[i] - npi[i]) /(npi[i]),2);
-            }
-            
-            //str.Location = new Point(1440 - 100, 20);
-            //str.Size = new Size(300, 300);
-            //str.Text = "";
-            bool AddQ = false;
-
-            DataGridViewCellStyle row = new DataGridViewCellStyle();
-            row.BackColor = Color.LightGray;
-
-            for (int i = 0; i < 7; i++)
-            {
-                int num = i + 1;
-                if (npi[i] < 5)
+                for (int j = 0; j < 7; j++)
                 {
-                    dataGrid1.Rows[i].DefaultCellStyle = row;
-                    //str.Text += num + " ";
-                    AddQ = true;
-                    if (AddQ && i == 6)
+                    for (int k = 0; k < 7; k++)
                     {
-                        for (int j = i - 1; j >= 0; j--)
+                        if (a[j] <= W[i] && W[i] < a[j + 1] && b[k] <= H[i] && H[i] < b[k + 1])
                         {
-                            if (npi[j] > 5)
-                            {
-                                int num1 = j + 1;
-                                dataGrid1.Rows[j].DefaultCellStyle = row;
-                                AddQ = false;
-                                break;
-                            }
+                            map[j, k]++;
                         }
-                    }  
-                }
-                else if (AddQ)
-                {
-                    dataGrid1.Rows[i].DefaultCellStyle = row;
-                    //str.Text += num + "\n";
-                    AddQ = false;
-                }
-                //else
-                //    str.Text += "\n" + num;
-            }
-            int m = 0;
-            for (int i = 0; i < 7; i++)
-            {
-                if (dataGrid1.Rows[i].DefaultCellStyle != row)
-                    m++;
-                else if (dataGrid1.Rows[i].DefaultCellStyle == row && dataGrid1.Rows[i + 1].DefaultCellStyle != row)
-                    m++;
-            }
-            double npitemp = 0;
-            int nitemp = 0;
-            double tempsum7 = 0;
-            for (int i = 0; i < 7; i++)
-            {
-                if(dataGrid1.Rows[i].DefaultCellStyle != row)
-                {
-                    double tempnum = Math.Round((ni[i] - npi[i]) * (ni[i] - npi[i]) / (npi[i]), 2);
-                    dataGrid1.Rows[i].Cells[7].Value = tempnum;
-                    tempsum7 += tempnum;
-                }
-                else if (dataGrid1.Rows[i].DefaultCellStyle == row && dataGrid1.Rows[i + 1].DefaultCellStyle != row)
-                {
-                    nitemp += ni[i];
-                    npitemp += npi[i];
-                    double tempnum = Math.Round((nitemp - npitemp) * (nitemp - npitemp) / (npitemp), 2);
-                    dataGrid1.Rows[i].Cells[7].Value = tempnum;
-                    tempsum7 += tempnum;
-                    //str.Text = nitemp + " " + npitemp;
-                    npitemp = 0;
-                    nitemp = 0;
-                }
-                else
-                {
-                    nitemp += ni[i];
-                    npitemp += npi[i];
+                    }
+
                 }
             }
-            
-
-
-            dataGrid1.Rows[7].Cells[0].Value = "Σ";
-            dataGrid1.Rows[7].Cells[1].Value = "-";
-            dataGrid1.Rows[7].Cells[2].Value = Convert.ToString(nisum);
-            dataGrid1.Rows[7].Cells[3].Value = "-";
-            dataGrid1.Rows[7].Cells[4].Value = "-";
-            dataGrid1.Rows[7].Cells[5].Value = pisum;
-            dataGrid1.Rows[7].Cells[6].Value = Convert.ToString(npisum);
-            dataGrid1.Rows[7].Cells[7].Value = tempsum7;
-            //str.Text = m + "";
-            //Controls.Add(str);
-
-        }
-        private void FillTableX(DataGridView dataGrid1)
-        {
-            for (int i = 0; i < 7; i++)
+            for (int i = 1; i < 8; i++)
             {
-                int ni = FindNumsW(a[i], a[i + 1]);
-                dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
-                dataGrid1.Rows[i].Cells[1].Value = "[" + Convert.ToString(a[i]) + ", " + Convert.ToString(a[i + 1]);
-                if (i == 6)
-                    dataGrid1.Rows[i].Cells[1].Value += "]";
-                else
-                    dataGrid1.Rows[i].Cells[1].Value += ")";
-                dataGrid1.Rows[i].Cells[2].Value = Convert.ToString((a[i] + hxW + a[i]) / 2);
-                dataGrid1.Rows[i].Cells[3].Value = Convert.ToString(ni);
-                dataGrid1.Rows[i].Cells[4].Value = string.Format("{0: 0.00}", (double)(ni) / 50);
-                dataGrid1.Rows[i].Cells[5].Value = string.Format("{0: 0.000}", (double)(ni) / 50 / hxW);
+                for (int j = 0; j < 7; j++)
+                {
+                    if (map[j, i - 1] != 0)
+                        dataGrid1[i, j].Value = map[j, i - 1].ToString();
+                }
             }
         }
-
-        private void FillTableY(DataGridView dataGrid1)
-        {
-            for (int i = 0; i < 7; i++)
-            {
-                int mi = FindNumsH(b[i], b[i + 1]);
-                dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
-                dataGrid1.Rows[i].Cells[1].Value = "[" + Convert.ToString(b[i]) + ", " + Convert.ToString(b[i + 1]);
-                if (i == 6)
-                    dataGrid1.Rows[i].Cells[1].Value += "]";
-                else
-                    dataGrid1.Rows[i].Cells[1].Value += ")";
-                dataGrid1.Rows[i].Cells[2].Value = Convert.ToString((b[i] + hyH + b[i]) / 2);
-                dataGrid1.Rows[i].Cells[3].Value = Convert.ToString(mi);
-                dataGrid1.Rows[i].Cells[4].Value = string.Format("{0: 0.00}", (double)(mi) / 50);
-                dataGrid1.Rows[i].Cells[5].Value = string.Format("{0: 0.000}", (double)(mi) / 50 / hyH);
-            }
-        }
-
-
-        double u_, v_, u2_, v2_, su2, sv2, x_, y_, s2x, s2y, su, sv, sx, sy;
-        private void FillTable3(DataGridView dataGrid1)
-        {
-            double xavr = (double)(a[3] + a[3 + 1])/2;
-            double yavr = (double)(b[3] + b[3 + 1])/2;
-            double[] sum = new double[8];
-            for (int i = 0; i < 8; i++)
-            {
-                sum[i] = 0;
-            }
-            for (int i = 0; i < 7; i++)
-            {
-                int ni = FindNumsW(a[i], a[i + 1]);
-                int mi = FindNumsH(b[i], b[i + 1]);
-                sum[1] += ni;
-                sum[5] += mi;
-                dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
-                double ui = ((double)(a[i] + a[i + 1]) / 2 - xavr) / hxW;
-                double vi = ((double)(b[i] + b[i + 1]) / 2 - yavr) / hyH;
-                sum[0] += ui;
-                sum[4] += vi;
-                dataGrid1.Rows[i].Cells[1].Value = ui;
-                dataGrid1.Rows[i].Cells[2].Value = Convert.ToString(ni);
-                dataGrid1.Rows[i].Cells[3].Value = Convert.ToString(ui*ni);
-                dataGrid1.Rows[i].Cells[4].Value = Convert.ToString(ui*ui*ni);
-                dataGrid1.Rows[i].Cells[5].Value = vi;
-                dataGrid1.Rows[i].Cells[6].Value = Convert.ToString(mi);
-                dataGrid1.Rows[i].Cells[7].Value = Convert.ToString(vi * mi);
-                dataGrid1.Rows[i].Cells[8].Value = Convert.ToString(vi * vi * mi);
-
-                sum[2] += ui*ni;
-                sum[3] += ui*ui*ni;
-                sum[6] += vi*mi;
-                sum[7] += vi*vi*mi;
-            }
-            dataGrid1.Rows[7].Cells[0].Value = "Σ";
-            for (int i = 0; i < 8; i++)
-            {
-                if(sum[i] == 0)
-                    dataGrid1.Rows[7].Cells[i + 1].Value = "-";
-                else
-                    dataGrid1.Rows[7].Cells[i+1].Value = Convert.ToString(sum[i]);
-            }
-            u_ = (double)sum[2] / 50;
-            v_ = (double)sum[6] / 50;
-            u2_ = sum[3] / 50;
-            v2_ = sum[7] / 50;
-            su2 = Math.Round(50 * (u2_ - u_ * u_) / 49, 2);
-            sv2 = Math.Round(50 * (v2_ - v_ * v_) / 49, 2);
-            su = Math.Round(Math.Sqrt(su2),2);
-            sv = Math.Round(Math.Sqrt(sv2),2 );
-            x_ = hxW * u_ + xavr;
-            y_ = Math.Round(hyH * v_ + yavr, 1);
-            s2x = hxW * hxW * su2;
-            s2y = hyH * hyH * sv2;
-            sx = Math.Round(Math.Sqrt(s2x), 2);
-            sy = Math.Round(Math.Sqrt(s2y), 2);
-            //testLb.Text = v_ + " "+ yavr +" " + x_ + " " + y_ + " " + s2x + " " + s2y + " " + sx + " " + sy;
-
-        }
-
-
 
         private void DrawGisto(int[] arr, string[] str, Chart chart1, bool flag, Point loc, bool Hflag)
         {
@@ -746,7 +840,7 @@ namespace MathStat
             chart1.Series[0].LegendText = "";
             chart1.ChartAreas[0].AxisX = ax;
             chart1.ChartAreas[0].AxisY = ay;
-            Controls.Add(chart1);
+            //Controls.Add(chart1);
             for (int i = 0; i < 7; i++)
             {
                 double Y;
@@ -754,7 +848,6 @@ namespace MathStat
                     Y = (double)FindNumsH(arr[i], arr[i + 1]) / 50;
                 else
                     Y = (double)FindNumsW(arr[i], arr[i + 1]) / 50;
-                //label1.Text = (arr[i], arr[i + 1]).ToString() + " " + Y;
                 if (flag)
                 {
                     if (Hflag)
@@ -765,7 +858,6 @@ namespace MathStat
                 }
                 else 
                     chart1.Series[0].Points.AddXY(((double)(arr[i] + arr[i + 1]) / 2).ToString(),  Y);
-                //label1.Text = (arr[i], arr[i + 1]).ToString() + " " + Y;
 
             }
         }

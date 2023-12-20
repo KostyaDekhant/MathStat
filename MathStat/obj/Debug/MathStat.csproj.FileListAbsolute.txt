@@ -10,3 +10,4 @@ C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.Core
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.exe
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.pdb
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.ResolveComReference.cache
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.FirstPage.resources
