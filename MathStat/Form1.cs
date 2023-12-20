@@ -87,7 +87,7 @@ namespace MathStat
             testLb.Location = new Point(980, 9);
             testLb.Size = new Size(100, 40);
             testLb.Text = "Сделал\nКостя Дехант ПИ11";
-            //Controls.Add(testLb);
+            Controls.Add(testLb);
 
             //nameTables[0].Location = new Point(20, 20); //Текст над таблицей 2
             //nameTables[1].Location = new Point(360+ 20, 20); //Текст над таблицей 3
@@ -108,7 +108,8 @@ namespace MathStat
 
             InitTables();
             InitTabCtrl();
-            
+            dataGrid[0].ClearSelection();
+            dataGrid[1].ClearSelection();
 
 
             //Создание кнопки для перезагрузки исходных данных
@@ -128,8 +129,14 @@ namespace MathStat
             DrawDataGrid(FirstHeaders, new Point(20, 40), new Size(40 + 60 * 5, 179), dataGrid[0], 8, 6);
             FillTableX(dataGrid[0]);
             DrawGisto(a, strX, chart[0], false, new Point(dataGrid[0].Location.X + 20 + dataGrid[0].Width, dataGrid[0].Location.Y), false);
+
+            FillGisto(a, chart[0], false, false);
+
             strX[1] = "n1/n*hx";
             DrawGisto(a, strX, chart[1], true, new Point(chart[0].Location.X + 20 + chart[0].Width, chart[0].Location.Y), false);
+
+            FillGisto(a, chart[1], true, false);
+
             nameTables[0].Location = new Point(dataGrid[0].Location.X, dataGrid[0].Location.Y - 20);
             nameTables[0].Text = "Таблица 2 – Группированный ряд для X";
             nameTables[1].Location = new Point(chart[0].Location.X, chart[0].Location.Y - 20);
@@ -142,8 +149,12 @@ namespace MathStat
             DrawDataGrid(SecondHeaders, new Point(20, dataGrid[0].Location.Y+40 + dataGrid[0].Height), new Size(40 + 60 * 5, 179), dataGrid[1], 8, 6);
             FillTableY(dataGrid[1]);
             DrawGisto(b, strY, chart[2], false, new Point(dataGrid[1].Location.X + 20 + dataGrid[1].Width, dataGrid[1].Location.Y), true);
+
+            FillGisto(b, chart[2], false, true);
             strY[1] = "m1/n*hy";
             DrawGisto(b, strY, chart[3], true, new Point(chart[2].Location.X + 20 + chart[2].Width, chart[2].Location.Y), true);
+
+            FillGisto(b, chart[3], true, true);
             nameTables[3].Location = new Point(dataGrid[1].Location.X, dataGrid[1].Location.Y - 20);
             nameTables[3].Text = "Таблица 3 – Группированный ряд для Y";
             nameTables[4].Location = new Point(chart[2].Location.X, chart[2].Location.Y - 20);
@@ -190,12 +201,21 @@ namespace MathStat
             //Заголовки и поправить в целом
             string[] SixHeaders = { };
             DrawDataGrid(SixHeaders, new Point(20, 40),
-                new Size(40 + 60 * 8 - 80, 179 + 20), dataGrid[5], 9, 9);
+                new Size(40 + 60 * 8 - 80 + 8*15, 179 + 20+15+30*7), dataGrid[5], 9, 9);
             FillTable6(dataGrid[5]);
             TableSix();
+            for (int i = 0; i < 8; i++)
+            {
+                dataGrid[5].Columns[i].Width += 15;
+                
+            }
+            dataGrid[5].Columns[0].Width += 15;
+            dataGrid[5].ColumnHeadersHeight += 15;
             nameTables[9].Location = new Point(dataGrid[5].Location.X, dataGrid[5].Location.Y - 20);
             nameTables[9].Text = "Таблица 7 – Корреляционная таблица";
             //-!
+
+
         }
         private void InitTabCtrl()
         {
@@ -236,6 +256,8 @@ namespace MathStat
             tabPage[4].Controls.Add(dataGrid[5]);
             tabPage[4].Controls.Add(nameTables[9]);
 
+
+
             tabControl1.Size = new Size(4 * 20 + dataGrid[0].Width + chart[0].Width + chart[1].Width + dataGrid[0].Location.X, 
                 dataGrid[0].Location.Y + dataGrid[0].Height + dataGrid[1].Height+20*4);
 
@@ -248,6 +270,27 @@ namespace MathStat
            if(tabControl1.SelectedIndex == 0)
             {
                 //tabControl1.Size = new Size(5 * 20 + dataGrid[0].Width + chart[0].Width + chart[1].Width, 4 * 20 + dataGrid[0].Height + dataGrid[1].Height);
+                dataGrid[0].ClearSelection();
+                dataGrid[1].ClearSelection();
+            }
+           else if(tabControl1.SelectedIndex == 1)
+            {
+                dataGrid[2].ClearSelection();
+                
+            }
+            else if (tabControl1.SelectedIndex == 2)
+            {
+                dataGrid[3].ClearSelection();
+                dataGrid[4].ClearSelection();
+            }
+            else if (tabControl1.SelectedIndex == 3)
+            {
+                
+            }
+            else if (tabControl1.SelectedIndex == 4)
+            {
+                dataGrid[5].ClearSelection();
+                tabControl1.Height = dataGrid[5].Location.Y + dataGrid[5].Height+30;
             }
         }
 
@@ -256,6 +299,13 @@ namespace MathStat
         void Refrech_Click(Object sender,
                                EventArgs e)
         {
+            System.Diagnostics.Process txt = new System.Diagnostics.Process();
+            txt.StartInfo.FileName = "notepad.exe";
+            txt.StartInfo.Arguments = path;
+            txt.Start();
+            txt.WaitForExit();
+
+
             //minW = maxW = RxW = minH = maxH = RyH = hyH = hxW = 0;
             rangeH = 0;
             rangeW = 0;
@@ -291,6 +341,7 @@ namespace MathStat
 
 
             ReadFile(path);
+
             FirstTable();
             FillTableX(dataGrid[0]);
             SecondTable();
@@ -300,15 +351,24 @@ namespace MathStat
             TableFour();
             FillTable4(dataGrid[3]);
             TableFive();
+
+            FillTable5(dataGrid[4]);
+            FillTable6(dataGrid[5]);
+
             //FillTable5(dataGrid[4]);
-            DrawGisto(a, strX, chart[0], false, new Point(20, 179 + 70), false);
-            strX[1] = "n1/n*hx";
-            DrawGisto(a, strX, chart[1], true, new Point(20, 179 + 70 + 179 + 20), false);
+            //DrawGisto(a, strX, chart[0], false, new Point(20, 179 + 70), false);
+            //strX[1] = "n1/n*hx";
+            //DrawGisto(a, strX, chart[1], true, new Point(20, 179 + 70 + 179 + 20), false);
 
 
-            DrawGisto(b, strY, chart[2], false, new Point(340 + 40, 179 + 70), true);
-            strY[1] = "m1/n*hy";
-            DrawGisto(b, strY, chart[3], true, new Point(340 + 40, 179 + 70 + 179 + 20), true);
+            //DrawGisto(b, strY, chart[2], false, new Point(340 + 40, 179 + 70), true);
+            //strY[1] = "m1/n*hy";
+            //DrawGisto(b, strY, chart[3], true, new Point(340 + 40, 179 + 70 + 179 + 20), true);
+
+            FillGisto(a, chart[0], false, false);
+            FillGisto(a, chart[1], true, false);
+            FillGisto(b, chart[2], false, true);
+            FillGisto(b, chart[3], true, true);
 
         }
 
@@ -805,6 +865,8 @@ namespace MathStat
             hlen = H.Length;
             //wlen = W.Length;
             int[,] map = new int[7, 7];
+            int sum = 0;
+            dataGrid1.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
             for (int i = 0; i < hlen; i++)
             {
                 for (int j = 0; j < 7; j++)
@@ -813,6 +875,7 @@ namespace MathStat
                     {
                         if (a[j] <= W[i] && W[i] < a[j + 1] && b[k] <= H[i] && H[i] < b[k + 1])
                         {
+                            sum++;
                             map[j, k]++;
                         }
                     }
@@ -827,6 +890,32 @@ namespace MathStat
                         dataGrid1[i, j].Value = map[j, i - 1].ToString();
                 }
             }
+
+            for (int i = 0; i < 7; i++)
+            {
+                //int ni = FindNumsW(a[i], a[i + 1]);
+                dataGrid1.Rows[i].Cells[0].Value = "[" + Convert.ToString(a[i]) + ", " + Convert.ToString(a[i + 1]);
+                if (i == 6)
+                    dataGrid1.Rows[i].Cells[0].Value += "]";
+                else
+                    dataGrid1.Rows[i].Cells[0].Value += ")";
+
+                dataGrid1.Columns[i+1].HeaderText = "[" + Convert.ToString(b[i]) + ", " + Convert.ToString(b[i + 1]);
+                if (i == 6)
+                    dataGrid1.Columns[i + 1].HeaderText += "]";
+                else
+                    dataGrid1.Columns[i + 1].HeaderText += ")";
+                dataGrid1.Columns[i + 1].HeaderText += "\ny"+(i+1).ToString()+"*="+((b[i + 1] + b[i])/2).ToString();
+                dataGrid1.Rows[i].Cells[0].Value += "\n\nx"+(i+1).ToString()+"*="+((a[i + 1] + a[i])/2).ToString();
+                dataGrid1.Rows[i].Height += 30;
+            }
+           
+           
+            //Добавить ещё строку с <x>
+
+            dataGrid1.Columns[8].HeaderText = "ni*";
+            dataGrid1.Rows[7].Cells[0].Value = "n*j";
+            dataGrid1.Rows[7].Cells[8].Value = "Σ=" + sum;
         }
 
         private void DrawGisto(int[] arr, string[] str, Chart chart1, bool flag, Point loc, bool Hflag)
@@ -841,10 +930,33 @@ namespace MathStat
             chart1.ChartAreas[0].AxisX = ax;
             chart1.ChartAreas[0].AxisY = ay;
             //Controls.Add(chart1);
+            //for (int i = 0; i < 7; i++)
+            //{
+            //    double Y;
+            //    if(Hflag)
+            //        Y = (double)FindNumsH(arr[i], arr[i + 1]) / 50;
+            //    else
+            //        Y = (double)FindNumsW(arr[i], arr[i + 1]) / 50;
+            //    if (flag)
+            //    {
+            //        if (Hflag)
+            //            Y /= hyH;
+            //        else
+            //            Y /= hxW;
+            //        chart1.Series[0].Points.AddXY((arr[i], arr[i + 1]).ToString(), Y);
+            //    }
+            //    else 
+            //        chart1.Series[0].Points.AddXY(((double)(arr[i] + arr[i + 1]) / 2).ToString(),  Y);
+
+            //}
+        }
+
+        private void FillGisto(int[] arr, Chart chart1, bool flag, bool Hflag)
+        {
             for (int i = 0; i < 7; i++)
             {
                 double Y;
-                if(Hflag)
+                if (Hflag)
                     Y = (double)FindNumsH(arr[i], arr[i + 1]) / 50;
                 else
                     Y = (double)FindNumsW(arr[i], arr[i + 1]) / 50;
@@ -856,11 +968,11 @@ namespace MathStat
                         Y /= hxW;
                     chart1.Series[0].Points.AddXY((arr[i], arr[i + 1]).ToString(), Y);
                 }
-                else 
-                    chart1.Series[0].Points.AddXY(((double)(arr[i] + arr[i + 1]) / 2).ToString(),  Y);
-
+                else
+                    chart1.Series[0].Points.AddXY(((double)(arr[i] + arr[i + 1]) / 2).ToString(), Y);
             }
         }
+
         private void ReadFile(string path)
         {
             string[] fileText = File.ReadAllLines(path);
