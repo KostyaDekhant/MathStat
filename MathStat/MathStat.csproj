@@ -97,6 +97,12 @@
     <Compile Include="SecondP.Designer.cs">
       <DependentUpon>SecondP.cs</DependentUpon>
     </Compile>
+    <Compile Include="SixthP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SixthP.Designer.cs">
+      <DependentUpon>SixthP.cs</DependentUpon>
+    </Compile>
     <Compile Include="ThirdP.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -132,6 +138,9 @@
     </Compile>
     <EmbeddedResource Include="SecondP.resx">
       <DependentUpon>SecondP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SixthP.resx">
+      <DependentUpon>SixthP.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ThirdP.resx">
       <DependentUpon>ThirdP.cs</DependentUpon>

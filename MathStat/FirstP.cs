@@ -4,8 +4,10 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 
 namespace MathStat
@@ -38,6 +40,34 @@ namespace MathStat
         {
             Form1 form = new Form1();
             //form.FirstTable();
+            Color clrFont = new Color();
+            Color clrBack = new Color();
+            if (Form1.darkMode)
+            {
+                clrBack = Color.FromArgb(255, 33, 31, 45);
+                clrFont = Color.White;
+            }
+            else
+            {
+                clrFont = Color.Black;
+                clrBack = Color.White;
+            }
+            this.BackColor = clrBack;
+            label1.BackColor = clrBack;
+            label2.BackColor = clrBack;
+            label3.BackColor = clrBack;
+            label4.BackColor = clrBack;
+            label5.BackColor = clrBack;
+            label6.BackColor = clrBack;
+            labelinfo.BackColor = clrBack;
+            labelinfo1.BackColor = clrBack;
+            label1.ForeColor = clrFont;
+            label2.ForeColor = clrFont;
+            label3.ForeColor = clrFont;
+            label4.ForeColor = clrFont;
+            label5.ForeColor = clrFont;
+            labelinfo.ForeColor = clrFont;
+            labelinfo1.ForeColor = clrFont;
             form.DrawDataGrid(Form1.FirstHeaders, new Point(20, 40), new Size((int)((40 + 60 * 5) * Form1.multiplier), (int)(179 * Form1.multiplier)), dataGrid1, 8, 6);
             form.FillTableX(dataGrid1);
             form.DrawGisto(Form1.a, Form1.strX, chart1, false, new Point(dataGrid1.Location.X + 20 + dataGrid1.Width, dataGrid1.Location.Y), false);
@@ -59,6 +89,8 @@ namespace MathStat
             label4.Font = new System.Drawing.Font("Arial", (int)(9* Form1.multiplier), System.Drawing.FontStyle.Bold);
             label5.Font = new System.Drawing.Font("Arial", (int)(9* Form1.multiplier), System.Drawing.FontStyle.Bold);
             label6.Font = new System.Drawing.Font("Arial", (int)(9* Form1.multiplier), System.Drawing.FontStyle.Bold);
+            labelinfo.Font = new System.Drawing.Font("Arial", (int)(9* Form1.multiplier), System.Drawing.FontStyle.Bold);
+            labelinfo1.Font = new System.Drawing.Font("Arial", (int)(9* Form1.multiplier), System.Drawing.FontStyle.Bold);
 
             //form.SecondTable();
             form.DrawDataGrid(Form1.SecondHeaders, new Point(20, dataGrid1.Location.Y + 40 + dataGrid1.Height), new Size((int)((40 + 60 * 5) * Form1.multiplier), (int)(179 * Form1.multiplier)), dataGrid2, 8, 6);
@@ -81,8 +113,21 @@ namespace MathStat
                 + Form1.maxW + " - " + Form1.minW + " = " + Form1.RxW + "\n" + 
                 "r = 7, hx = Rx / r = " + Form1.RxW + "/7=" + Math.Round(Form1.RxW/7,3).ToString() + "\n"
                 +"Для удобства возьмём hx = "+ Form1.hxW + "\nТогда расширение промежутка разбиения составит ("
-                + Form1.hxW+ " - " + Math.Round(Form1.RxW / 7, 3).ToString() + ")*7 = " + Form1.extensionW;
-            labelinfo.Location = new Point(20, dataGrid2.Location.Y + dataGrid2.Height + 20);
+                + Form1.hxW+ " - " + Math.Round(Form1.RxW / 7, 3).ToString() + ")*7 = " + Form1.extensionW+
+                "\nДля определения границ интервалов  [ai-1, i) можно для удобства (чтобы\nграницы " +
+                "интервалов стали целыми числами) сдвинуть начало 1-го интервала,\n например, в точку a0 = xmin - "+
+                Math.Round((Form1.minW - Form1.a[0]), 1)  + " = "+ Form1.minW + " - " + Math.Round((Form1.minW - Form1.a[0]), 1) + " = " + Form1.a[0];
+            labelinfo.Location = new Point(20, dataGrid2.Location.Y + dataGrid2.Height + 15);
+
+            labelinfo1.Text = "ymax = " + Form1.maxH + ", ymin = " + Form1.minH + "\nRy = ymax - ymin = "
+                + Form1.maxH + " - " + Form1.minH + " = " + Form1.RyH + "\n" +
+                "r = 7, hy = Ry / r = " + Form1.RyH + "/7=" + Math.Round(((double)Form1.RyH / 7), 3).ToString() + "\n"
+                + "Для удобства возьмём hy = " + Form1.hyH + "\nТогда расширение промежутка разбиения составит ("
+                + Form1.hyH + " - " + Math.Round(((double)Form1.RyH / 7), 3).ToString() + ")*7 = " + Form1.extensionH +
+                "\nДля определения границ интервалов  [bi-1, i) можно для удобства (чтобы\nграницы " +
+                "интервалов стали целыми числами) сдвинуть начало 1-го интервала,\n например, в точку b0 = ymin - " +
+                Math.Floor(Form1.extensionH / 2) + " = " + Form1.minH + " - " + Math.Floor(Form1.extensionH / 2) + " = " + Form1.b[0];
+            labelinfo1.Location = new Point(chart2.Location.X-150, dataGrid2.Location.Y + dataGrid2.Height + 15);
         }
     }
 }

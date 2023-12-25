@@ -53,6 +53,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.labelinfo = new System.Windows.Forms.Label();
+            this.labelinfo1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
@@ -210,12 +211,23 @@
             this.labelinfo.TabIndex = 12;
             this.labelinfo.Text = "label7";
             // 
+            // labelinfo1
+            // 
+            this.labelinfo1.AutoSize = true;
+            this.labelinfo1.ForeColor = System.Drawing.Color.Black;
+            this.labelinfo1.Location = new System.Drawing.Point(410, 635);
+            this.labelinfo1.Name = "labelinfo1";
+            this.labelinfo1.Size = new System.Drawing.Size(35, 13);
+            this.labelinfo1.TabIndex = 13;
+            this.labelinfo1.Text = "label7";
+            // 
             // FirstP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1097, 687);
+            this.Controls.Add(this.labelinfo1);
             this.Controls.Add(this.labelinfo);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label6);
@@ -258,5 +270,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label labelinfo;
+        private System.Windows.Forms.Label labelinfo1;
     }
 }

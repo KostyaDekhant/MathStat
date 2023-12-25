@@ -9,7 +9,6 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 
 
-
 namespace MathStat
 {
     public partial class Form1 : Form
@@ -26,6 +25,7 @@ namespace MathStat
         public static string path = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\4.txt"; //Путь к исходникам
         public static string pathall = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\all.txt"; //Путь к исходникам
         public static string patht = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\t.txt"; //Путь к распр. стьюд.
+        public static string pathX = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\x.txt"; //Путь к распр. стьюд.
         public static Chart[] chart = new Chart[4]; //Графики
 
         //Для Ф(x)
@@ -45,6 +45,8 @@ namespace MathStat
         public static double extensionW;
         public static double extensionH;
         public static double multiplier = 1;
+        public static int m1;
+        public static int m2;
 
         //List<Tuple<double, double, double>> F = new List<Tuple<double, double, double>>();
 
@@ -71,6 +73,7 @@ namespace MathStat
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            
             //CreateFs();
             for (int i = 0; i < 4; i++)
             {
@@ -141,7 +144,9 @@ namespace MathStat
             {
                 guna2ComboBox1.Items.Add("Вариант "+ (i+1).ToString());
             }
-            guna2ComboBox1.SelectedIndex = 25;
+            guna2ComboBox1.SelectedIndex = 3;
+            this.Show();
+            //MessageBox.Show("Данное приложения разработано для ", "Добро пожаловать!", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public void FullScreen()
@@ -354,7 +359,7 @@ namespace MathStat
         private void gBttn6_Click(object sender, EventArgs e)
         {
             actualeFormNum = 6;
-            //OpenChildForm(new SixthP(), sender);
+            OpenChildForm(new SixthP(), sender);
         }
 
 
@@ -458,6 +463,7 @@ namespace MathStat
 
         private void guna2Button1_Click(object sender, EventArgs e)
         {
+            actualeFormNum = 7;
             OpenChildForm(new InputVar(), sender);
         }
 
@@ -511,6 +517,9 @@ namespace MathStat
                 case 6:
                     gBttn6.PerformClick();
                     break;
+                case 7:
+                    guna2Button1.PerformClick();
+                    break;
 
             }
         }
@@ -525,10 +534,61 @@ namespace MathStat
             else
                 multiplier = 1;
             PerformClicks();
+            darkModeCB.Location = new Point(228, this.Height - 80);
             label3.Location = new Point(this.Width - 340, this.Height - 85);
             guna2ComboBox1.Location = new Point(this.Width - 180, this.Height - 90);
             Back_Panel.Size = new Size(this.Width - 220, this.Height - 50 - 95);
             labelCreator.Location = new Point(labelCreator.Location.X, this.Height - 100);
+        }
+
+        public static bool darkMode = false;
+        private void darkModeCB_CheckedChanged(object sender, EventArgs e)
+        {
+            Color clr = new Color();
+            Color clrBack = new Color();
+            if(darkModeCB.Checked)
+            {
+                darkMode = true;
+                this.BackColor = Color.FromArgb(255, 33, 31, 45);
+                clrBack = Color.FromArgb(255, 11, 8, 19);
+                clr = Color.White;
+
+            }
+            else
+            {
+                darkMode = false;
+                this.BackColor = Color.White;
+                clrBack = Color.FromArgb(255, 234, 233, 234);
+                clr = Color.Black;
+
+            }
+            guna2Panel1.BackColor = clrBack;
+            PerformClicks();
+            label1.ForeColor = clr;
+            label3.ForeColor = clr;
+            labelCreator.ForeColor = clr;
+            gBttn1.ForeColor = clr;
+            gBttn2.ForeColor = clr;
+            gBttn3.ForeColor = clr;
+            gBttn4.ForeColor = clr;
+            gBttn5.ForeColor = clr;
+            gBttn6.ForeColor = clr;
+            guna2Button1.ForeColor = clr;
+            darkModeCB.ForeColor = clr;
+            gBttn1.FillColor = clrBack;
+            gBttn2.FillColor = clrBack;
+            gBttn3.FillColor = clrBack;
+            gBttn4.FillColor = clrBack;
+            gBttn5.FillColor = clrBack;
+            gBttn6.FillColor = clrBack;
+            guna2Button1.FillColor = clrBack;
+            gBttn1.BackColor = clrBack;
+            gBttn2.BackColor = clrBack;
+            gBttn3.BackColor = clrBack;
+            gBttn4.BackColor = clrBack;
+            gBttn5.BackColor = clrBack;
+            gBttn6.BackColor = clrBack;
+            guna2Button1.BackColor = clrBack;
         }
 
         public void TableSix()
@@ -722,12 +782,11 @@ namespace MathStat
                 dataGrid1.Rows[i].Cells[5].Value = string.Format("{0: 0.000}", (double)(mi) / 50 / hyH);
             }
         }
-
+        public static double[] sum = new double[8];
         public void FillTable3(DataGridView dataGrid1)
         {
             double xavr = (double)(a[3] + a[3 + 1])/2;
             double yavr = (double)(b[3] + b[3 + 1])/2;
-            double[] sum = new double[8];
             for (int i = 0; i < 8; i++)
             {
                 sum[i] = 0;
@@ -782,7 +841,8 @@ namespace MathStat
             sx = Math.Round(Math.Sqrt(s2x), 2);
             sy = Math.Round(Math.Sqrt(s2y), 2);
         }
-
+        public static double tempsum7;
+        public static double tempsum7_2;
         public void FillTable4(DataGridView dataGrid1)
         {
             double[] zi = new double[8];
@@ -839,17 +899,21 @@ namespace MathStat
                     AddQ = true;
                     if (AddQ && i == 6)
                     {
-                        for (int j = i - 2; j >= 0; j--)
+                        for (int j = i - 1; j >= 0; j--)
                         {
-                            temp_sum += npi[j];
-                            if (temp_sum  >= 5)//(npi[j] >= 5)//
+                            if (npi[j] >= 5)
                             {
-                                int num1 = j + 1;
-                                dataGrid1.Rows[j].DefaultCellStyle = row;
-                                AddQ = false;
-                                temp_sum = 0;
-                                break;
+                                temp_sum += npi[j];
+                                if (temp_sum >= 5)//(npi[j] >= 5)//
+                                {
+                                    int num1 = j + 1;
+                                    dataGrid1.Rows[j].DefaultCellStyle = row;
+                                    AddQ = false;
+                                    temp_sum = 0;
+                                    break;
+                                }
                             }
+                                
                         }
                     }
                 }
@@ -864,17 +928,17 @@ namespace MathStat
                     temp_sum = 0;
                 }
             }
-            int m = 0;
+            m1 = 0;
             for (int i = 0; i < 7; i++)
             {
                 if (dataGrid1.Rows[i].DefaultCellStyle != row)
-                    m++;
+                    m1++;
                 else if (dataGrid1.Rows[i].DefaultCellStyle == row && dataGrid1.Rows[i + 1].DefaultCellStyle != row)
-                    m++;
+                    m1++;
             }
             double npitemp = 0;
             int nitemp = 0;
-            double tempsum7 = 0;
+            tempsum7 = 0;
             for (int i = 0; i < 7; i++)
             {
                 if (dataGrid1.Rows[i].DefaultCellStyle != row)
@@ -912,6 +976,7 @@ namespace MathStat
             dataGrid1.Rows[7].Cells[7].Value = tempsum7;
         }
 
+       
         public void FillTable5(DataGridView dataGrid1)
         {
 
@@ -959,25 +1024,33 @@ namespace MathStat
             bool AddQ = false;
 
 
+            double temp_sum = 0;
             for (int i = 0; i < 7; i++)
             {
                 int num = i + 1;
-                if (npi[i] < 5)
+                temp_sum += npi[i];
+                //MessageBox.Show(temp_sum.ToString());
+                if (temp_sum < 5)//(npi[i] < 5)
                 {
                     dataGrid1.Rows[i].DefaultCellStyle = row;
-                    //str.Text += num + " ";
                     AddQ = true;
                     if (AddQ && i == 6)
                     {
                         for (int j = i - 1; j >= 0; j--)
                         {
-                            if (npi[j] > 5)
+                            if (npi[j] >= 5)
                             {
-                                int num1 = j + 1;
-                                dataGrid1.Rows[j].DefaultCellStyle = row;
-                                AddQ = false;
-                                break;
+                                temp_sum += npi[j];
+                                if (temp_sum >= 5)//(npi[j] >= 5)//
+                                {
+                                    int num1 = j + 1;
+                                    dataGrid1.Rows[j].DefaultCellStyle = row;
+                                    AddQ = false;
+                                    temp_sum = 0;
+                                    break;
+                                }
                             }
+
                         }
                     }
                 }
@@ -985,29 +1058,33 @@ namespace MathStat
                 {
                     dataGrid1.Rows[i].DefaultCellStyle = row;
                     //str.Text += num + "\n";
+                    temp_sum = 0;
                     AddQ = false;
                 }
-                //else
-                //    str.Text += "\n" + num;
+                else
+                    temp_sum = 0;
+                    //else
+                    //    str.Text += "\n" + num;
+                
             }
-            int m = 0;
+            m2 = 0;
             for (int i = 0; i < 7; i++)
             {
                 if (dataGrid1.Rows[i].DefaultCellStyle != row)
-                    m++;
+                    m2++;
                 else if (dataGrid1.Rows[i].DefaultCellStyle == row && dataGrid1.Rows[i + 1].DefaultCellStyle != row)
-                    m++;
+                    m2++;
             }
             double npitemp = 0;
             int mitemp = 0;
-            double tempsum7 = 0;
+            tempsum7_2 = 0;
             for (int i = 0; i < 7; i++)
             {
                 if (dataGrid1.Rows[i].DefaultCellStyle != row)
                 {
                     double tempnum = Math.Round((mi[i] - npi[i]) * (mi[i] - npi[i]) / (npi[i]), 2);
                     dataGrid1.Rows[i].Cells[7].Value = tempnum;
-                    tempsum7 += tempnum;
+                    tempsum7_2 += tempnum;
                 }
                 else if (dataGrid1.Rows[i].DefaultCellStyle == row && dataGrid1.Rows[i + 1].DefaultCellStyle != row)
                 {
@@ -1015,7 +1092,7 @@ namespace MathStat
                     npitemp += npi[i];
                     double tempnum = Math.Round((mitemp - npitemp) * (mitemp - npitemp) / (npitemp), 2);
                     dataGrid1.Rows[i].Cells[7].Value = tempnum;
-                    tempsum7 += tempnum;
+                    tempsum7_2 += tempnum;
                     //str.Text = nitemp + " " + npitemp;
                     npitemp = 0;
                     mitemp = 0;
@@ -1034,8 +1111,8 @@ namespace MathStat
             dataGrid1.Rows[7].Cells[4].Value = "-";
             dataGrid1.Rows[7].Cells[5].Value = pisum;
             dataGrid1.Rows[7].Cells[6].Value = Convert.ToString(npisum);
-            dataGrid1.Rows[7].Cells[7].Value = tempsum7;
-            //str.Text = m + "";
+            dataGrid1.Rows[7].Cells[7].Value = tempsum7_2;
+            //MessageBox.Show(m.ToString());
             //Controls.Add(str);
 
         }
@@ -1110,9 +1187,30 @@ namespace MathStat
                 }
             }
             uv_ /= 50;
-            rв = 50 *(uv_-u_*v_)/(su*sv*49);
+            rв = Math.Round(50 *(uv_-u_*v_)/(su*sv*49), 2);
             //MessageBox.Show(sx.ToString() + "  " + sy.ToString());
         }
+
+        public  double X(double p, int k) {
+            int num = 0;
+            string[] str = File.ReadAllLines(pathX);
+            if (p == 0.05)
+                num = 1;
+            else if (p == 0.100)
+                num = 2;
+            else if (p == 0.90)
+                num = 3;
+            else if (p == 0.95)
+                num = 4;
+            else if (p == 0.975)
+                num = 5;
+            else if (p == 0.99)
+                num = 6;
+            else if (p == 0.995)
+                num = 7;
+            return Convert.ToDouble(str[num * 36 + k - 1]);
+        }
+
 
         public void DrawGisto(int[] arr, string[] str, Chart chart1, bool flag, Point loc, bool Hflag)
         {

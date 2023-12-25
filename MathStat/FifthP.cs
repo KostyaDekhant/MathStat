@@ -26,7 +26,23 @@ namespace MathStat
         private void InitTable() 
         {
             Form1 form = new Form1();
-            
+            Color clrFont = new Color();
+            Color clrBack = new Color();
+            if (Form1.darkMode)
+            {
+                clrBack = Color.FromArgb(255, 33, 31, 45);
+                clrFont = Color.White;
+            }
+            else
+            {
+                clrFont = Color.Black;
+                clrBack = Color.White;
+            }
+            this.BackColor = clrBack;
+            nameTable.BackColor = clrBack;
+            label1.BackColor = clrBack;
+            nameTable.ForeColor = clrFont;
+            label1.ForeColor = clrFont;
             string[] SixHeaders = { };
             form.DrawDataGrid(SixHeaders, new Point(20, 40),
                 new Size((int)((40 + 50 * 9+70) * Form1.multiplier), (int)((179 + 20 + 15 + 30 * 7 + 10 ) * Form1.multiplier)), dataGrid1, 9, 9);
@@ -47,8 +63,13 @@ namespace MathStat
             dataGrid1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             dataGrid1.ColumnHeadersHeight = (int)(47 * Form1.multiplier);
             nameTable.Location = new Point(dataGrid1.Location.X, dataGrid1.Location.Y - (int)(20 * Form1.multiplier));
+            label1.Location = new Point(dataGrid1.Location.X + dataGrid1.Width + 20, dataGrid1.Location.Y + (int)(20 * Form1.multiplier));
             nameTable.Font = new System.Drawing.Font("Arial", (int)(9 * Form1.multiplier), System.Drawing.FontStyle.Bold);
+            label1.Font = new System.Drawing.Font("Arial", (int)(9 * Form1.multiplier), System.Drawing.FontStyle.Bold);
             nameTable.Text = "Таблица 7 – Корреляционная таблица";
+            label1.Text = "Вычислим выборочный коэффициент rв, используя условные варианты: \n" +
+                "rв = (n/n-1)*((u*v)_-u_*v_)/(su*sv)" + " rв = " + Form1.N + "/" + (Form1.N - 1) + "*(" + Form1.uv_ + " - (" + Form1.u_ + ")*(" +
+                Form1.v_ + "))/(" + Form1.su + "*" + Form1.sv + ") = " + Form1.rв;
         }
     }
 }

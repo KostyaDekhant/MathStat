@@ -19,3 +19,4 @@ C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.ThirdP.reso
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.FifthP.resources
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.FourthP.resources
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.InputVar.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.SixthP.resources

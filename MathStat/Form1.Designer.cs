@@ -41,6 +41,7 @@
             this.guna2ComboBox1 = new Guna.UI2.WinForms.Guna2ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.guna2Button1 = new Guna.UI2.WinForms.Guna2Button();
+            this.darkModeCB = new Guna.UI2.WinForms.Guna2CheckBox();
             this.guna2Panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -263,12 +264,32 @@
             this.guna2Button1.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
             this.guna2Button1.Click += new System.EventHandler(this.guna2Button1_Click);
             // 
+            // darkModeCB
+            // 
+            this.darkModeCB.AutoSize = true;
+            this.darkModeCB.CheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.darkModeCB.CheckedState.BorderRadius = 0;
+            this.darkModeCB.CheckedState.BorderThickness = 0;
+            this.darkModeCB.CheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.darkModeCB.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F);
+            this.darkModeCB.Location = new System.Drawing.Point(228, 640);
+            this.darkModeCB.Name = "darkModeCB";
+            this.darkModeCB.Size = new System.Drawing.Size(140, 26);
+            this.darkModeCB.TabIndex = 5;
+            this.darkModeCB.Text = "Темная тема";
+            this.darkModeCB.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
+            this.darkModeCB.UncheckedState.BorderRadius = 0;
+            this.darkModeCB.UncheckedState.BorderThickness = 0;
+            this.darkModeCB.UncheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
+            this.darkModeCB.CheckedChanged += new System.EventHandler(this.darkModeCB_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1424, 681);
+            this.Controls.Add(this.darkModeCB);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.guna2ComboBox1);
             this.Controls.Add(this.Back_Panel);
@@ -299,6 +320,7 @@
         private Guna.UI2.WinForms.Guna2ComboBox guna2ComboBox1;
         private System.Windows.Forms.Label label3;
         private Guna.UI2.WinForms.Guna2Button guna2Button1;
+        public Guna.UI2.WinForms.Guna2CheckBox darkModeCB;
     }
 }
 
