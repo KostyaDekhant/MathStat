@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -18,47 +19,55 @@ namespace MathStat
             InitializeComponent();
         }
 
-        Queue <Double> weight = new Queue <Double> (); //Вес
-        Queue <Int32> height = new Queue <Int32> ();   //Рост
-        string path = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\data.txt"; //Путь к исходникам
-        Chart[] chart = new Chart[4]; //Графики
+        private Form actualF;
+        public static Queue<Double> weight = new Queue <Double> (); //Вес
+        public static Queue<Int32> height = new Queue <Int32> ();   //Рост
+        public static Queue<Tuple<int, Queue<Double>>> tValues = new Queue <Tuple<int, Queue<Double>>> ();   //Рост
+        public static string path = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\4.txt"; //Путь к исходникам
+        public static string pathall = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\all.txt"; //Путь к исходникам
+        public static string patht = @"C:\Users\Podor\Documents\GitHub\MathStat\MathStat\t.txt"; //Путь к распр. стьюд.
+        public static Chart[] chart = new Chart[4]; //Графики
 
         //Для Ф(x)
-        Microsoft.Office.Interop.Excel.Application exApp = new Microsoft.Office.Interop.Excel.Application();
+        public static Microsoft.Office.Interop.Excel.Application exApp = new Microsoft.Office.Interop.Excel.Application();
 
-        double minW, maxW, RxW;
-        int minH, maxH, RyH, hyH, hxW;
-        int rangeH;
-        double rangeW;
-        int[] a = new int[8]; //Вес
-        int[] b = new int[8]; //Рост
-        double[] ui = new double[7]; //Для веса
-        double[] vi = new double[7]; //Для роста
-        double extensionW;
-        double extensionH;
+        public static int N = 50;
+        public static double y = 0.95;
+        public static double minW, maxW, RxW;
+        public static int minH, maxH, RyH, hyH, hxW;
+        public static int rangeH;
+        public static double rangeW;
+        public static int[] a = new int[8]; //Вес
+        public static int[] b = new int[8]; //Рост
+        public static double[] Ui = new double[7]; //Для веса
+        public static double[] Vi = new double[7]; //Для роста
+        public static double rв, uv_; //Выборочный коэффициент, и uv_ для пункта 5
+        public static double extensionW;
+        public static double extensionH;
+        public static double multiplier = 1;
 
         //List<Tuple<double, double, double>> F = new List<Tuple<double, double, double>>();
 
-        string[] FirstHeaders = { "[ai–1, ai)", "xi*", "ni", "ni/n", "ni/n*hx" };
-        string[] SecondHeaders = { "[bi-1, bi)", "yi*", "mi", "mi/n", "mi/n*hy" };
-        string[] ThirdHeaders = { "ui", "ni", "uini", "ui^2", "vi", "mi", "vimi", "vi^2mu"};
-        string[] FourHeaders = { "[ai-1, ai)", "ni", "zi=(ai-x_)/sx", "Ф(zi)", "pi", "npi", "(ni-npi)^2/npi"};
-        string[] FiveHeaders = { "[bi-1, bi)", "mi", "zi=(bi-y_)/sy", "Ф(zi)", "pi", "npi", "(mi-npi)^2/npi"};
-        string[] strX = { "x", "ni/n" };
-        string[] strY = { "y", "mi/n" };
+        public static string[] FirstHeaders = { "[ai–1, ai)", "xi*", "ni", "ni/n", "ni/n*hx" };
+        public static string[] SecondHeaders = { "[bi-1, bi)", "yi*", "mi", "mi/n", "mi/n*hy" };
+        public static string[] ThirdHeaders = { "ui", "ni", "uini", "ui^2", "vi", "mi", "vimi", "vi^2mu"};
+        public static string[] FourHeaders = { "[ai-1, ai)", "ni", "zi=(ai-x_)/sx", "Ф(zi)", "pi", "npi", "(ni-npi)^2/npi"};
+        public static string[] FiveHeaders = { "[bi-1, bi)", "mi", "zi=(bi-y_)/sy", "Ф(zi)", "pi", "npi", "(mi-npi)^2/npi"};
+        public static string[] strX = { "x", "ni/n" };
+        public static string[] strY = { "y", "mi/n" };
 
         //Variebles for Table3
-        double u_, v_, u2_, v2_, su2, sv2, x_, y_, s2x, s2y, su, sv, sx, sy;
+        static public double u_, v_, u2_, v2_, su2, sv2, x_, y_, s2x, s2y, su, sv, sx, sy;
 
         //Таблицы
-        DataGridView[] dataGrid = new DataGridView[6];
+        static public DataGridView[] dataGrid = new DataGridView[6];
 
-        Label[] nameTables = new Label[15];
-        Label testLb = new Label();
+        static public Label[] nameTables = new Label[15];
+        static public Label testLb = new Label();
 
         //Нужно для цветов строк
-        DataGridViewCellStyle row = new DataGridViewCellStyle(); //Серый цвет (закрашенный)
-        DataGridViewCellStyle row1 = new DataGridViewCellStyle(); //Стандартный цвет
+        static public DataGridViewCellStyle row = new DataGridViewCellStyle(); //Серый цвет (закрашенный)
+        static public DataGridViewCellStyle row1 = new DataGridViewCellStyle(); //Стандартный цвет
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -87,7 +96,7 @@ namespace MathStat
             testLb.Location = new Point(980, 9);
             testLb.Size = new Size(100, 40);
             testLb.Text = "Сделал\nКостя Дехант ПИ11";
-            Controls.Add(testLb);
+            //Controls.Add(testLb);
 
             //nameTables[0].Location = new Point(20, 20); //Текст над таблицей 2
             //nameTables[1].Location = new Point(360+ 20, 20); //Текст над таблицей 3
@@ -96,18 +105,22 @@ namespace MathStat
             
             //Размер окна
             this.Size = new Size(1440,720);
+            //Цвет окна
+            //this.BackColor = Color.FromArgb(255, 15, 15, 15);
+            //Цвет страницы
+
 
             //Инициализация таблиц
             for (int i = 0; i < 6; i++)
             {
                 dataGrid[i] = new DataGridView();
             }
-            ReadFile(path); //Чтение исходников
+            ReadFile(pathall, 4); //Чтение исходников
 
             row.BackColor = Color.LightGray;
 
-            InitTables();
-            InitTabCtrl();
+            //InitTables();
+            //InitTabCtrl();
             dataGrid[0].ClearSelection();
             dataGrid[1].ClearSelection();
 
@@ -118,49 +131,64 @@ namespace MathStat
             button.Size = new Size(20, 20);
             button.Visible = true;
             button.Click += new EventHandler(this.Refrech_Click);
-            Controls.Add(button);
+            //Controls.Add(button);
+            InitTables();
             //-!
+            OpenChildForm(new InputVar(), sender);
+            tInit();
+
+            for (int i = 0; i < 26; i++)
+            {
+                guna2ComboBox1.Items.Add("Вариант "+ (i+1).ToString());
+            }
+            guna2ComboBox1.SelectedIndex = 25;
         }
 
-        private void InitTables()
+        public void FullScreen()
+        {
+            guna2Panel1.Size = new Size(220, this.Height);
+            multiplier = 1.5;
+        }
+
+        public void InitTables()
         {
             //Всё необходимое для первого пункта
             FirstTable();
-            DrawDataGrid(FirstHeaders, new Point(20, 40), new Size(40 + 60 * 5, 179), dataGrid[0], 8, 6);
-            FillTableX(dataGrid[0]);
-            DrawGisto(a, strX, chart[0], false, new Point(dataGrid[0].Location.X + 20 + dataGrid[0].Width, dataGrid[0].Location.Y), false);
+            //DrawDataGrid(FirstHeaders, new Point(20, 40), new Size(40 + 60 * 5, 179), dataGrid[0], 8, 6);
+            //FillTableX(dataGrid[0]);
+            //DrawGisto(a, strX, chart[0], false, new Point(dataGrid[0].Location.X + 20 + dataGrid[0].Width, dataGrid[0].Location.Y), false);
 
-            FillGisto(a, chart[0], false, false);
+            //FillGisto(a, chart[0], false, false);
 
-            strX[1] = "n1/n*hx";
-            DrawGisto(a, strX, chart[1], true, new Point(chart[0].Location.X + 20 + chart[0].Width, chart[0].Location.Y), false);
+            //strX[1] = "n1/n*hx";
+           // DrawGisto(a, strX, chart[1], true, new Point(chart[0].Location.X + 20 + chart[0].Width, chart[0].Location.Y), false);
 
-            FillGisto(a, chart[1], true, false);
+            //FillGisto(a, chart[1], true, false);
 
-            nameTables[0].Location = new Point(dataGrid[0].Location.X, dataGrid[0].Location.Y - 20);
-            nameTables[0].Text = "Таблица 2 – Группированный ряд для X";
-            nameTables[1].Location = new Point(chart[0].Location.X, chart[0].Location.Y - 20);
-            nameTables[1].Text = "Полигон относительных частот";
-            nameTables[2].Location = new Point(chart[1].Location.X, chart[1].Location.Y - 20);
-            nameTables[2].Text = "Гистрограмма относительных частот";
+            //nameTables[0].Location = new Point(dataGrid[0].Location.X, dataGrid[0].Location.Y - 20);
+            //nameTables[0].Text = "Таблица 2 – Группированный ряд для X";
+            //nameTables[1].Location = new Point(chart[0].Location.X, chart[0].Location.Y - 20);
+            //nameTables[1].Text = "Полигон относительных частот";
+            //nameTables[2].Location = new Point(chart[1].Location.X, chart[1].Location.Y - 20);
+            //nameTables[2].Text = "Гистрограмма относительных частот";
 
 
             SecondTable();
-            DrawDataGrid(SecondHeaders, new Point(20, dataGrid[0].Location.Y+40 + dataGrid[0].Height), new Size(40 + 60 * 5, 179), dataGrid[1], 8, 6);
-            FillTableY(dataGrid[1]);
-            DrawGisto(b, strY, chart[2], false, new Point(dataGrid[1].Location.X + 20 + dataGrid[1].Width, dataGrid[1].Location.Y), true);
+            //DrawDataGrid(SecondHeaders, new Point(20, dataGrid[0].Location.Y+40 + dataGrid[0].Height), new Size(40 + 60 * 5, 179), dataGrid[1], 8, 6);
+            //FillTableY(dataGrid[1]);
+            //DrawGisto(b, strY, chart[2], false, new Point(dataGrid[1].Location.X + 20 + dataGrid[1].Width, dataGrid[1].Location.Y), true);
 
-            FillGisto(b, chart[2], false, true);
-            strY[1] = "m1/n*hy";
-            DrawGisto(b, strY, chart[3], true, new Point(chart[2].Location.X + 20 + chart[2].Width, chart[2].Location.Y), true);
+            //FillGisto(b, chart[2], false, true);
+            //strY[1] = "m1/n*hy";
+            //DrawGisto(b, strY, chart[3], true, new Point(chart[2].Location.X + 20 + chart[2].Width, chart[2].Location.Y), true);
 
-            FillGisto(b, chart[3], true, true);
-            nameTables[3].Location = new Point(dataGrid[1].Location.X, dataGrid[1].Location.Y - 20);
-            nameTables[3].Text = "Таблица 3 – Группированный ряд для Y";
-            nameTables[4].Location = new Point(chart[2].Location.X, chart[2].Location.Y - 20);
-            nameTables[4].Text = "Полигон относительных частот";
-            nameTables[5].Location = new Point(chart[3].Location.X, chart[3].Location.Y - 20);
-            nameTables[5].Text = "Гистрограмма относительных частот";
+            //FillGisto(b, chart[3], true, true);
+            //nameTables[3].Location = new Point(dataGrid[1].Location.X, dataGrid[1].Location.Y - 20);
+            //nameTables[3].Text = "Таблица 3 – Группированный ряд для Y";
+            //nameTables[4].Location = new Point(chart[2].Location.X, chart[2].Location.Y - 20);
+            //nameTables[4].Text = "Полигон относительных частот";
+            //nameTables[5].Location = new Point(chart[3].Location.X, chart[3].Location.Y - 20);
+            //nameTables[5].Text = "Гистрограмма относительных частот";
             //-!
 
 
@@ -169,26 +197,26 @@ namespace MathStat
             ThirdTable();
             DrawDataGrid(ThirdHeaders, new Point(20, 40), new Size(40 + 60 * 8, 179 + 21), dataGrid[2], 9, 9);
             FillTable3(dataGrid[2]);
-            nameTables[6].Location = new Point(dataGrid[2].Location.X, dataGrid[2].Location.Y - 20);
-            nameTables[6].Text = "Таблица 4 – Группированные данные для условных вариант";
+            //nameTables[6].Location = new Point(dataGrid[2].Location.X, dataGrid[2].Location.Y - 20);
+            //nameTables[6].Text = "Таблица 4 – Группированные данные для условных вариант";
             //-!
 
             //Пунтк 3
 
-            DrawDataGrid(FourHeaders, new Point(20,40),
-                                new Size(40 + 60 * 8 - 32, 179 + 20), dataGrid[3], 9, 8);
-            TableFour();
-            FillTable4(dataGrid[3]);
-            nameTables[7].Location = new Point(dataGrid[3].Location.X, dataGrid[3].Location.Y - 20);
-            nameTables[7].Text = "Таблица 5 – Расчёт Xв^2 для признака X";
+            //DrawDataGrid(FourHeaders, new Point(20,40),
+            //                    new Size(40 + 60 * 8 - 32, 179 + 20), dataGrid[3], 9, 8);
+            //TableFour();
+            //FillTable4(dataGrid[3]);
+            //nameTables[7].Location = new Point(dataGrid[3].Location.X, dataGrid[3].Location.Y - 20);
+            //nameTables[7].Text = "Таблица 5 – Расчёт Xв^2 для признака X";
 
 
-            DrawDataGrid(FiveHeaders, new Point(dataGrid[3].Location.X + dataGrid[3].Width + 20, dataGrid[3].Location.Y),
-               new Size(40 + 60 * 8 - 32, 179 + 20), dataGrid[4], 9, 8);
-            TableFive();
-            FillTable5(dataGrid[4]);
-            nameTables[8].Location = new Point(dataGrid[4].Location.X, dataGrid[4].Location.Y - 20);
-            nameTables[8].Text = "Таблица 6 – Расчёт Xв^2 для признака Y";
+            //DrawDataGrid(FiveHeaders, new Point(dataGrid[3].Location.X + dataGrid[3].Width + 20, dataGrid[3].Location.Y),
+            //   new Size(40 + 60 * 8 - 32, 179 + 20), dataGrid[4], 9, 8);
+            //TableFive();
+            //FillTable5(dataGrid[4]);
+            //nameTables[8].Location = new Point(dataGrid[4].Location.X, dataGrid[4].Location.Y - 20);
+            //nameTables[8].Text = "Таблица 6 – Расчёт Xв^2 для признака Y";
             //-!
 
             //Пунтк 4
@@ -199,182 +227,180 @@ namespace MathStat
 
             //Пункт 5
             //Заголовки и поправить в целом
-            string[] SixHeaders = { };
-            DrawDataGrid(SixHeaders, new Point(20, 40),
-                new Size(40 + 60 * 8 - 80 + 8*15, 179 + 20+15+30*7), dataGrid[5], 9, 9);
-            FillTable6(dataGrid[5]);
+            //string[] SixHeaders = { };
+            //DrawDataGrid(SixHeaders, new Point(20, 40),
+            //    new Size(40 + 60 * 8 - 80 + 8*15, 179 + 20+15+30*7+10), dataGrid[5], 9, 9);
+            //FillTable6(dataGrid[5]);
             TableSix();
-            for (int i = 0; i < 8; i++)
-            {
-                dataGrid[5].Columns[i].Width += 15;
+            //for (int i = 0; i < 8; i++)
+            //{
+            //    dataGrid[5].Columns[i].Width += 15;
                 
-            }
-            dataGrid[5].Columns[0].Width += 15;
-            dataGrid[5].ColumnHeadersHeight += 15;
-            nameTables[9].Location = new Point(dataGrid[5].Location.X, dataGrid[5].Location.Y - 20);
-            nameTables[9].Text = "Таблица 7 – Корреляционная таблица";
+            //}
+            //dataGrid[5].Columns[0].Width += 15;
+            //dataGrid[5].ColumnHeadersHeight += 25;
+            //nameTables[9].Location = new Point(dataGrid[5].Location.X, dataGrid[5].Location.Y - 20);
+            //nameTables[9].Text = "Таблица 7 – Корреляционная таблица";
             //-!
 
 
         }
         private void InitTabCtrl()
         {
-            TabPage []tabPage = new TabPage[7];
+            //TabPage []tabPage = new TabPage[7];
 
-            for (int i = 0; i < 7; i++)
-            {
-                tabPage[i] = new TabPage();
+            //for (int i = 0; i < 7; i++)
+            //{
+            //    tabPage[i] = new TabPage();
 
                
-                tabControl1.Controls.Add(tabPage[i]);
-                tabControl1.TabPages[i].Text = "Пункт " + (i + 1).ToString();
-            }
-            tabPage[0].Controls.Add(dataGrid[0]);
-            tabPage[0].Controls.Add(nameTables[0]);
-            tabPage[0].Controls.Add(dataGrid[1]);
-            tabPage[0].Controls.Add(nameTables[1]);
-            tabPage[0].Controls.Add(chart[0]); 
-            tabPage[0].Controls.Add(nameTables[2]);
-            tabPage[0].Controls.Add(chart[1]);
-            tabPage[0].Controls.Add(nameTables[3]);
-            tabPage[0].Controls.Add(chart[2]); 
-            tabPage[0].Controls.Add(nameTables[4]);
-            tabPage[0].Controls.Add(chart[3]); 
-            tabPage[0].Controls.Add(nameTables[5]);
+            //    tabControl1.Controls.Add(tabPage[i]);
+            //    tabControl1.TabPages[i].Text = "Пункт " + (i + 1).ToString();
+            //}
+            //tabPage[0].Controls.Add(dataGrid[0]);
+            //tabPage[0].Controls.Add(nameTables[0]);
+            //tabPage[0].Controls.Add(dataGrid[1]);
+            //tabPage[0].Controls.Add(nameTables[1]);
+            //tabPage[0].Controls.Add(chart[0]); 
+            //tabPage[0].Controls.Add(nameTables[2]);
+            //tabPage[0].Controls.Add(chart[1]);
+            //tabPage[0].Controls.Add(nameTables[3]);
+            //tabPage[0].Controls.Add(chart[2]); 
+            //tabPage[0].Controls.Add(nameTables[4]);
+            //tabPage[0].Controls.Add(chart[3]); 
+            //tabPage[0].Controls.Add(nameTables[5]);
 
 
-            tabPage[1].Controls.Add(dataGrid[2]);
-            tabPage[1].Controls.Add(nameTables[6]);
+            //tabPage[1].Controls.Add(dataGrid[2]);
+            //tabPage[1].Controls.Add(nameTables[6]);
 
-            tabPage[2].Controls.Add(dataGrid[3]);
-            tabPage[2].Controls.Add(nameTables[7]);
+            //tabPage[2].Controls.Add(dataGrid[3]);
+            //tabPage[2].Controls.Add(nameTables[7]);
 
-            tabPage[2].Controls.Add(dataGrid[4]);
-            tabPage[2].Controls.Add(nameTables[8]);
+            //tabPage[2].Controls.Add(dataGrid[4]);
+            //tabPage[2].Controls.Add(nameTables[8]);
 
-            //tabPage[4].Controls.Add();
-            tabPage[4].Controls.Add(dataGrid[5]);
-            tabPage[4].Controls.Add(nameTables[9]);
+            ////tabPage[4].Controls.Add();
+            //tabPage[4].Controls.Add(dataGrid[5]);
+            //tabPage[4].Controls.Add(nameTables[9]);
 
 
 
-            tabControl1.Size = new Size(4 * 20 + dataGrid[0].Width + chart[0].Width + chart[1].Width + dataGrid[0].Location.X, 
-                dataGrid[0].Location.Y + dataGrid[0].Height + dataGrid[1].Height+20*4);
+            //tabControl1.Size = new Size(4 * 20 + dataGrid[0].Width + chart[0].Width + chart[1].Width + dataGrid[0].Location.X, 
+            //    dataGrid[0].Location.Y + dataGrid[0].Height + dataGrid[1].Height+20*4);
 
 
 
         }
 
-        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        private Button currentButton;
+        private Form activeForm = new Form();
+        private void ActivateButton(object btnSender)
         {
-           if(tabControl1.SelectedIndex == 0)
-            {
-                //tabControl1.Size = new Size(5 * 20 + dataGrid[0].Width + chart[0].Width + chart[1].Width, 4 * 20 + dataGrid[0].Height + dataGrid[1].Height);
-                dataGrid[0].ClearSelection();
-                dataGrid[1].ClearSelection();
-            }
-           else if(tabControl1.SelectedIndex == 1)
-            {
-                dataGrid[2].ClearSelection();
-                
-            }
-            else if (tabControl1.SelectedIndex == 2)
-            {
-                dataGrid[3].ClearSelection();
-                dataGrid[4].ClearSelection();
-            }
-            else if (tabControl1.SelectedIndex == 3)
-            {
-                
-            }
-            else if (tabControl1.SelectedIndex == 4)
-            {
-                dataGrid[5].ClearSelection();
-                tabControl1.Height = dataGrid[5].Location.Y + dataGrid[5].Height+30;
-            }
+            //if(btnSender != null)
+            //{
+            //    if(currentButton != (Button)btnSender)
+            //}
         }
+
+        private void OpenChildForm(Form childForm, object btnSender)
+        {
+            if(activeForm != null)
+            {
+                activeForm.Close();
+            }
+            ActivateButton(btnSender);
+            activeForm = childForm;
+            childForm.TopLevel = false;
+            childForm.FormBorderStyle = FormBorderStyle.None;
+            childForm.Dock = DockStyle.Fill;
+            this.Back_Panel.Controls.Add(childForm);
+            this.Back_Panel.Tag = childForm;
+            childForm.BringToFront();
+            childForm.Show();
+        }
+
+        int actualeFormNum = 0;
+        private void gBttn1_Click(object sender, EventArgs e)
+        {
+            actualeFormNum = 1;
+            OpenChildForm(new FirstP(), sender);
+        }
+
+        private void gBttn2_Click(object sender, EventArgs e)
+        {
+            actualeFormNum = 2;
+            OpenChildForm(new SecondP(), sender);
+        }
+
+        private void gBttn3_Click(object sender, EventArgs e)
+        {
+            actualeFormNum = 3;
+            OpenChildForm(new ThirdP(), sender);
+        }
+
+        private void gBttn4_Click(object sender, EventArgs e)
+        {
+            actualeFormNum = 4;
+            OpenChildForm(new FourthP(), sender);
+        }
+
+        private void gBttn5_Click(object sender, EventArgs e)
+        {
+            actualeFormNum = 5;
+            OpenChildForm(new FifthP(), sender);
+        }
+
+        private void gBttn6_Click(object sender, EventArgs e)
+        {
+            actualeFormNum = 6;
+            //OpenChildForm(new SixthP(), sender);
+        }
+
+
+
+
+
+        //private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    if (tabControl1.SelectedIndex == 0)
+        //    {
+        //        //tabControl1.Size = new Size(5 * 20 + dataGrid[0].Width + chart[0].Width + chart[1].Width, 4 * 20 + dataGrid[0].Height + dataGrid[1].Height);
+        //        dataGrid[0].ClearSelection();
+        //        dataGrid[1].ClearSelection();
+        //    }
+        //    else if (tabControl1.SelectedIndex == 1)
+        //    {
+        //        dataGrid[2].ClearSelection();
+
+        //    }
+        //    else if (tabControl1.SelectedIndex == 2)
+        //    {
+        //        dataGrid[3].ClearSelection();
+        //        dataGrid[4].ClearSelection();
+        //    }
+        //    else if (tabControl1.SelectedIndex == 3)
+        //    {
+
+        //    }
+        //    else if (tabControl1.SelectedIndex == 4)
+        //    {
+        //        dataGrid[5].ClearSelection();
+        //        tabControl1.Height = dataGrid[5].Location.Y + dataGrid[5].Height + 30;
+        //    }
+        //}
 
 
         //Исправить ещё в одном месте значение, чтобы не слетало.
         void Refrech_Click(Object sender,
                                EventArgs e)
         {
-            System.Diagnostics.Process txt = new System.Diagnostics.Process();
-            txt.StartInfo.FileName = "notepad.exe";
-            txt.StartInfo.Arguments = path;
-            txt.Start();
-            txt.WaitForExit();
-
-
-            //minW = maxW = RxW = minH = maxH = RyH = hyH = hxW = 0;
-            rangeH = 0;
-            rangeW = 0;
-            for (int i = 0; i < 8; i++)
-            {
-                a[i] = 0;
-                b[i] = 0;
-            }
-            extensionW = 0;
-            extensionH = 0;
-            int templen = height.Count;
-            for (int i = 0; i < templen; i++)
-            {
-                height.Dequeue();
-                weight.Dequeue();
-            }
-            for (int i = 0; i < 7; i++)
-            {
-                dataGrid[3].Rows[i].DefaultCellStyle = row1;
-                dataGrid[4].Rows[i].DefaultCellStyle = row1;
-            }
-            int lencount;
-            for (int i = 0; i < 4; i++)
-            {
-                chart[i].Series.RemoveAt(0);
-                chart[i].Series.Add("");
-                //chart[i].ChartAreas.Add("");
-            }
-            chart[0].Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            chart[2].Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            chart[0].Series[0].BorderWidth = 5;
-            chart[2].Series[0].BorderWidth = 5;
-
-
-            ReadFile(path);
-
-            FirstTable();
-            FillTableX(dataGrid[0]);
-            SecondTable();
-            FillTableY(dataGrid[1]);
-            ThirdTable();
-            FillTable3(dataGrid[2]);
-            TableFour();
-            FillTable4(dataGrid[3]);
-            TableFive();
-
-            FillTable5(dataGrid[4]);
-            FillTable6(dataGrid[5]);
-
-            //FillTable5(dataGrid[4]);
-            //DrawGisto(a, strX, chart[0], false, new Point(20, 179 + 70), false);
-            //strX[1] = "n1/n*hx";
-            //DrawGisto(a, strX, chart[1], true, new Point(20, 179 + 70 + 179 + 20), false);
-
-
-            //DrawGisto(b, strY, chart[2], false, new Point(340 + 40, 179 + 70), true);
-            //strY[1] = "m1/n*hy";
-            //DrawGisto(b, strY, chart[3], true, new Point(340 + 40, 179 + 70 + 179 + 20), true);
-
-            FillGisto(a, chart[0], false, false);
-            FillGisto(a, chart[1], true, false);
-            FillGisto(b, chart[2], false, true);
-            FillGisto(b, chart[3], true, true);
 
         }
 
 
-         //Таблица 2, но первая для подсчётов (группированный ряд для X)
-        private void FirstTable()
+        //Таблица 2, но первая для подсчётов (группированный ряд для X)
+        public void FirstTable()
         {
             minW = weight.Min(); 
             maxW = weight.Max(); 
@@ -394,7 +420,7 @@ namespace MathStat
             }
         }
 
-        private void SecondTable()
+        public void SecondTable()
         {
             minH = height.Min();
             maxH = height.Max();
@@ -412,42 +438,182 @@ namespace MathStat
             }
         }
 
-        private void ThirdTable()
+        public void ThirdTable()
         {
             //DrawDataGrid(ThirdHeaders, new Point(20 + 20 + 340 + 340 + 20, 50), new Size(40 + 60 * 8, 179+21), dataGrid[2], 9, 9);
         }
 
-        private void TableFour()
+        public void TableFour()
         {
             //исправить ширину
-            dataGrid[3].Columns[3].Width = 70;
-            dataGrid[3].Columns[7].Width = 75;
+            //dataGrid[3].Columns[3].Width = 70;
+            //dataGrid[3].Columns[7].Width = 75;
         }
 
-        private void TableFive()
+        public void TableFive()
         {
-            dataGrid[4].Columns[3].Width = 70;
-            dataGrid[4].Columns[7].Width = 75;
+            //dataGrid[4].Columns[3].Width = 70;
+            //dataGrid[4].Columns[7].Width = 75;
         }
 
-
-        private void TableSix()
+        private void guna2Button1_Click(object sender, EventArgs e)
         {
-            for (int i = 1; i < 9; i++)
-            {
-                dataGrid[5].Columns[i].Width = 50;
-            }
-            dataGrid[5].Columns[0].HeaderText = "X/Y";
+            OpenChildForm(new InputVar(), sender);
+        }
+
+        private void guna2ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Refresh_data();
+            ReadFile(pathall, guna2ComboBox1.SelectedIndex + 1);
             
+            InitTables();
+            PerformClicks();
+        }
+
+        private void Refresh_data()
+        {
+            minW = maxW= RxW = rangeW = rв= uv_= extensionW= extensionH= u_= v_=
+                u2_= v2_=  su2=  sv2= x_= y_= s2x= s2y= su= sv= sx= sy = 0;
+            minH =maxH= RyH =hyH = hxW = rangeH = 0;
             for (int i = 0; i < 7; i++)
             {
-                dataGrid[5].Rows[i].Cells[8].Value = FindNumsW(a[i], a[i + 1]).ToString(); 
-                dataGrid[5].Rows[7].Cells[i+1].Value = FindNumsH(b[i], b[i + 1]).ToString(); 
+                a[i] = 0;
+                b[i] = 0;
+                Ui[i] = 0;
+                Vi[i] = 0;
+            }
+            height.Clear(); 
+            weight.Clear(); 
+        }
+
+        private void PerformClicks()
+        {
+            switch(actualeFormNum)
+            {
+                case 0:
+                    guna2Button1.PerformClick();
+                    break;
+                case 1:
+                    gBttn1.PerformClick();
+                    break;
+                case 2:
+                    gBttn2.PerformClick();
+                    break;
+                case 3:
+                    gBttn3.PerformClick();
+                    break;
+                case 4:
+                    gBttn4.PerformClick();
+                    break;
+                case 5:
+                    gBttn5.PerformClick();
+                    break;
+                case 6:
+                    gBttn6.PerformClick();
+                    break;
+
             }
         }
 
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+
+            if (this.WindowState == System.Windows.Forms.FormWindowState.Maximized)
+            {
+                FullScreen();
+            }
+            else
+                multiplier = 1;
+            PerformClicks();
+            label3.Location = new Point(this.Width - 340, this.Height - 85);
+            guna2ComboBox1.Location = new Point(this.Width - 180, this.Height - 90);
+            Back_Panel.Size = new Size(this.Width - 220, this.Height - 50 - 95);
+            labelCreator.Location = new Point(labelCreator.Location.X, this.Height - 100);
+        }
+
+        public void TableSix()
+        {
+            //for (int i = 1; i < 9; i++)
+            //{
+            //    dataGrid[5].Columns[i].Width = 50;
+            //}
+            //dataGrid[5].Columns[0].HeaderText = "X/Y";
+            
+            //for (int i = 0; i < 7; i++)
+            //{
+            //    dataGrid[5].Rows[i].Cells[8].Value = FindNumsW(a[i], a[i + 1]).ToString(); 
+            //    dataGrid[5].Rows[7].Cells[i+1].Value = FindNumsH(b[i], b[i + 1]).ToString(); 
+            //}
+        }
+
+        public string CalcMX()
+        {
+            double leftV, rightV;
+            //tInit();
+            
+            double a = 1 - y;
+            CalcT = Math.Round(t(1 - (a / 2), N - 1), 2); //
+            leftV = Math.Round(x_ - (sx / Math.Sqrt(N)) * CalcT, 2); //
+            rightV = Math.Round(x_ + (sx / Math.Sqrt(N)) * CalcT, 2); //
+            return leftV.ToString() + " < M(X) < " +rightV;
+        }
+        public string CalcMY()
+        {
+            double leftV, rightV;
+            //tInit();
+            
+            double a = 1 - y;
+            CalcT = Math.Round(t(1 - (a / 2), N - 1), 2); //
+            leftV = Math.Round(y_ - (sy / Math.Sqrt(N)) * CalcT, 2); //
+            rightV = Math.Round(y_ + (sy / Math.Sqrt(N)) * CalcT, 2); //
+            return string.Format("{0: 0.00}", leftV) + " < M(Y) < " + string.Format("{0: 0.00}", rightV);
+        }
+        public static double CalcT = 0;
+        public double t(double a, int n)
+        {
+            int tempI = 1;
+            
+            for (int i = 1; i < 11; i++)
+            {
+                //MessageBox.Show(a.ToString() +  " " + ArrT[0, i]);
+                if (ArrT[0, i] == a)
+                {
+                    tempI = i;
+                    break;
+                }
+            }
+            CalcT = Math.Round(ArrT[n, tempI], 2);
+            return ArrT[n, tempI];
+        }
+        double[,] ArrT = new double[100,52];
+        public void tInit()
+        {
+            //double num = 0;
+            string[] str = File.ReadAllLines(patht);
+            int strlen = str.Length;
+            for (int i = 0; i < strlen; i++)
+            {
+                string[] str1 = str[i].Split();
+                //int str1len = str1.Length;
+                //Queue<Double> temp = new Queue<Double>();
+                //for (int j = 1; j < str1len; j++)
+                //{
+                //    temp.Enqueue(Convert.ToDouble(str1[j]));
+                //}
+                //tValues.Enqueue(new Tuple<Int32, Queue<Double>>(Convert.ToInt32(str1[0]), temp));
+                for (int j = 1; j < 11; j++)
+                {
+                    ArrT[i, j] = Convert.ToDouble(str1[j]);
+                }
+            }
+            
+            //tValues.Dequeue().Item2.ToArray()
+
+        }
+
+
         //ni подсчёт
-        private int FindNumsW(double left, double right)
+        public int FindNumsW(double left, double right)
         {
             double[] arr = weight.ToArray();
             int arrlen = arr.Length;
@@ -460,7 +626,7 @@ namespace MathStat
             return count;
         }
 
-        private int FindNumsH(int left, int right)
+        public int FindNumsH(int left, int right)
         {
             int[] arr = height.ToArray();
             int arrlen = arr.Length;
@@ -473,7 +639,7 @@ namespace MathStat
             return count;
         }
 
-        private void DrawDataGrid(string[] str, Point point, Size size, DataGridView data, int rows, int columns)
+        public void DrawDataGrid(string[] str, Point point, Size size, DataGridView data, int rows, int columns)
         {
             //data = new DataGridView();
             data.Location = point;
@@ -487,12 +653,17 @@ namespace MathStat
                 data.Columns[i].HeaderText = str[i-1];
             }
             data.RowHeadersVisible = false;
-            data.Columns[0].Width = 40;
-            for (int i = 1; i <= str.Length; i++)
+            data.Columns[0].Width = (int)(40 * multiplier);
+            for (int i = 1; i < columns; i++)
             {
-                data.Columns[i].Width = 60;
+                data.Columns[i].Width = (int)(60 *multiplier);
+            }
+            for (int i = 0; i < rows; i++)
+            {
+                data.Rows[i].Height = (int)(data.Rows[i].Height * multiplier);
             }
             data.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+            data.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
             data.AllowUserToAddRows = false;
             data.AllowUserToDeleteRows = false;
             data.ReadOnly = true;
@@ -504,7 +675,7 @@ namespace MathStat
             data.ClearSelection();
         }
 
-        private double Ffuncion(double zi)
+        public double Ffuncion(double zi)
         {
             double Fnum = 0;
             Fnum = exApp.WorksheetFunction.Erf(0, zi / Math.Sqrt(2));
@@ -514,9 +685,9 @@ namespace MathStat
         }
 
 
-       
 
-        private void FillTableX(DataGridView dataGrid1)
+
+        public void FillTableX(DataGridView dataGrid1)
         {
             for (int i = 0; i < 7; i++)
             {
@@ -534,7 +705,7 @@ namespace MathStat
             }
         }
 
-        private void FillTableY(DataGridView dataGrid1)
+        public void FillTableY(DataGridView dataGrid1)
         {
             for (int i = 0; i < 7; i++)
             {
@@ -552,7 +723,7 @@ namespace MathStat
             }
         }
 
-        private void FillTable3(DataGridView dataGrid1)
+        public void FillTable3(DataGridView dataGrid1)
         {
             double xavr = (double)(a[3] + a[3 + 1])/2;
             double yavr = (double)(b[3] + b[3 + 1])/2;
@@ -569,7 +740,9 @@ namespace MathStat
                 sum[5] += mi;
                 dataGrid1.Rows[i].Cells[0].Value = Convert.ToString(i + 1);
                 double ui = ((double)(a[i] + a[i + 1]) / 2 - xavr) / hxW;
+                Ui[i] = ui;
                 double vi = ((double)(b[i] + b[i + 1]) / 2 - yavr) / hyH;
+                Vi[i] = vi;
                 sum[0] += ui;
                 sum[4] += vi;
                 dataGrid1.Rows[i].Cells[1].Value = ui;
@@ -610,7 +783,7 @@ namespace MathStat
             sy = Math.Round(Math.Sqrt(s2y), 2);
         }
 
-        private void FillTable4(DataGridView dataGrid1)
+        public void FillTable4(DataGridView dataGrid1)
         {
             double[] zi = new double[8];
             zi[0] = -7.0;
@@ -654,22 +827,27 @@ namespace MathStat
             DataGridViewCellStyle row = new DataGridViewCellStyle();
             row.BackColor = Color.LightGray;
 
+            double temp_sum = 0;
             for (int i = 0; i < 7; i++)
             {
                 int num = i + 1;
-                if (npi[i] < 5)
+                temp_sum += npi[i];
+                //MessageBox.Show(temp_sum.ToString());
+                if (temp_sum < 5)//(npi[i] < 5)
                 {
                     dataGrid1.Rows[i].DefaultCellStyle = row;
                     AddQ = true;
                     if (AddQ && i == 6)
                     {
-                        for (int j = i - 1; j >= 0; j--)
+                        for (int j = i - 2; j >= 0; j--)
                         {
-                            if (npi[j] > 5)
+                            temp_sum += npi[j];
+                            if (temp_sum  >= 5)//(npi[j] >= 5)//
                             {
                                 int num1 = j + 1;
                                 dataGrid1.Rows[j].DefaultCellStyle = row;
                                 AddQ = false;
+                                temp_sum = 0;
                                 break;
                             }
                         }
@@ -678,7 +856,12 @@ namespace MathStat
                 else if (AddQ)
                 {
                     dataGrid1.Rows[i].DefaultCellStyle = row;
+                    temp_sum = 0;
                     AddQ = false;
+                }
+                else
+                {
+                    temp_sum = 0;
                 }
             }
             int m = 0;
@@ -729,7 +912,7 @@ namespace MathStat
             dataGrid1.Rows[7].Cells[7].Value = tempsum7;
         }
 
-        private void FillTable5(DataGridView dataGrid1)
+        public void FillTable5(DataGridView dataGrid1)
         {
 
 
@@ -857,7 +1040,7 @@ namespace MathStat
 
         }
 
-        private void FillTable6(DataGridView dataGrid1)
+        public void FillTable6(DataGridView dataGrid1)
         {
             int[] H = height.ToArray<Int32>();
             double[] W = weight.ToArray<Double>();
@@ -905,8 +1088,8 @@ namespace MathStat
                     dataGrid1.Columns[i + 1].HeaderText += "]";
                 else
                     dataGrid1.Columns[i + 1].HeaderText += ")";
-                dataGrid1.Columns[i + 1].HeaderText += "\ny"+(i+1).ToString()+"*="+((b[i + 1] + b[i])/2).ToString();
-                dataGrid1.Rows[i].Cells[0].Value += "\n\nx"+(i+1).ToString()+"*="+((a[i + 1] + a[i])/2).ToString();
+                dataGrid1.Columns[i + 1].HeaderText += "\ny"+(i+1).ToString()+"*="+((b[i + 1] + b[i])/2).ToString() + "\n<" + Vi[i].ToString() + ">";
+                dataGrid1.Rows[i].Cells[0].Value += "\nx"+(i+1).ToString()+"*="+((double)(a[i + 1] + a[i]) / 2).ToString() + "\n<" + Ui[i].ToString()+">";
                 dataGrid1.Rows[i].Height += 30;
             }
            
@@ -916,12 +1099,25 @@ namespace MathStat
             dataGrid1.Columns[8].HeaderText = "ni*";
             dataGrid1.Rows[7].Cells[0].Value = "n*j";
             dataGrid1.Rows[7].Cells[8].Value = "Σ=" + sum;
+
+            uv_ = 0;
+            for (int i = 0; i < 7; i++)
+            {
+                for (int j = 0; j < 7; j++)
+                {
+                    uv_ += Ui[i] * Vi[j] * map[j,i];
+                   
+                }
+            }
+            uv_ /= 50;
+            rв = 50 *(uv_-u_*v_)/(su*sv*49);
+            //MessageBox.Show(sx.ToString() + "  " + sy.ToString());
         }
 
-        private void DrawGisto(int[] arr, string[] str, Chart chart1, bool flag, Point loc, bool Hflag)
+        public void DrawGisto(int[] arr, string[] str, Chart chart1, bool flag, Point loc, bool Hflag)
         {
             chart1.Location = loc;
-            chart1.Size = new Size(340, 179);
+            chart1.Size = new Size((int)(340 *multiplier), (int)(179 * multiplier));
             Axis ax = new Axis();
             ax.Title = str[0];
             Axis ay = new Axis();
@@ -951,7 +1147,7 @@ namespace MathStat
             //}
         }
 
-        private void FillGisto(int[] arr, Chart chart1, bool flag, bool Hflag)
+        public void FillGisto(int[] arr, Chart chart1, bool flag, bool Hflag)
         {
             for (int i = 0; i < 7; i++)
             {
@@ -973,15 +1169,18 @@ namespace MathStat
             }
         }
 
-        private void ReadFile(string path)
+        public void ReadFile(string path, int num)
         {
+            int count = N / 5;
+            int shift = (num - 1) * 10;
             string[] fileText = File.ReadAllLines(path);
-            string[][] Cells = new string[fileText.Length][];
-            for (int i = 0; i < fileText.Length; i++)
+            string[][] Cells = new string[count][];
+            int c = 0;
+            for (int i = shift; i < shift+count; i++)
             {
-                Cells[i] = fileText[i].Split(' ');
+                Cells[c++] = fileText[i].Split(' ');
             }
-            for (int j = 0; j < fileText.Length; j++)
+            for (int j = 0; j < count; j++)
             {
                 for (int i = 0; i < 5; i++)
                 {

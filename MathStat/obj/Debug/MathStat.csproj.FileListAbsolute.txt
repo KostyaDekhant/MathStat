@@ -11,3 +11,11 @@ C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.exe
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.pdb
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.ResolveComReference.cache
 C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.FirstPage.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\bin\Debug\Guna.UI2.dll
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.csproj.CopyComplete
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.FirstP.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.SecondP.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.ThirdP.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.FifthP.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.FourthP.resources
+C:\Users\Podor\Documents\GitHub\MathStat\MathStat\obj\Debug\MathStat.InputVar.resources
